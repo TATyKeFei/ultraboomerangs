@@ -1,0 +1,9 @@
+name: UltraBoomerangs
+version: '${project.version}'
+main: me.abisgamer.ultraboomerangs.UltraBoomerangs
+api-version: 1.16
+authors: [ AbisGamer ]
+description: Customizable Boomerangs Plugin
+commands:
+  ultraboomerangs:
+    description: The main command for UltraBoomerangs

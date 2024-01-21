@@ -1,0 +1,8 @@
+prefix: "&6[UltraBoomerangs] "
+received: "&aYou received the boomerang: "
+make-success: "&aSuccessfully created Boomerang: &6"
+id-error: "&cYou must provide a Boomerang ID"
+invalid: "&cThis boomerang does not exist!"
+limit-error: "&cYou already have a boomerang in the air!"
+reload: "&aSucessfully reloaded config.yml & messages.yml"
+cooldown: "&cThis boomerang is on cooldown: &a"
