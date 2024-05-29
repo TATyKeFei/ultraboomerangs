@@ -5,3 +5,14 @@ https://www.spigotmc.org/resources/ultraboomerangs-create-custom-unqiue-boomeran
 ![alt text](https://proxy.spigotmc.org/e7c1ec8de1a9b721ea69134f5b1568018684690d?url=https%3A%2F%2Fi.imgur.com%2FqTkJn00.png)
 ![alt text](https://proxy.spigotmc.org/0ea3f71ed2857fbdc3c39b9438f0c12b3f20ef51?url=https%3A%2F%2Fi.imgur.com%2FV4l6yAZ.png)
 ![alt text](https://proxy.spigotmc.org/04a6c34dbdb9aa63107bb913212ea911302e5921?url=https%3A%2F%2Fs6.gifyu.com%2Fimages%2FS6D3U.gif)
+## License
+Shield: [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
+
+This work is licensed under a
+[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg

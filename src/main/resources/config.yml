@@ -11,6 +11,8 @@ armorstand:
 listener:
   priority: HIGH #Can be HIGH, HIGHEST, LOW, LOWEST, MONITOR, NORMAL
 
+update-old-boomerangs: false # Enable this to update old boomerangs with PDC if you were using 1.0.2 or below, if not then you SHOULD disable it.
+
 boomerangs:
   boomerang_1:
     material: bone #The material
@@ -23,9 +25,15 @@ boomerangs:
     damage: 50 #Damage done to entities
     custom-model: 1022 #Custom model data
     enchanted: true #Make the boomerang enchanted giving it the glowing effect
-    travel-distance: 5 #How far the boomerang should tavel when thrown
-    click-type: "right" #Possible types: right & left
+    travel-distance: 5 #How far the boomerang should travel when thrown
+    click-type: "drop" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    sounds:
+      enabled: true
+      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
+      receive-sound: "ENTITY_ITEM_PICKUP"
+      volume: 1.0
+      pitch: 1.0
 
   boomerang_2:
     is-itemstack: false
@@ -39,8 +47,14 @@ boomerangs:
     custom-model: 1024
     enchanted: false
     travel-distance: 10
-    click-type: "right"
+    click-type: "right" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    sounds:
+      enabled: true
+      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
+      receive-sound: "ENTITY_ITEM_PICKUP"
+      volume: 1.0
+      pitch: 1.0
 
   boomerang_3:
     is-itemstack: false
@@ -54,10 +68,14 @@ boomerangs:
     custom-model: 1026
     enchanted: true
     travel-distance: 15
-    right-click: true
-    click-type: "left"
+    click-type: "left" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
-
+    sounds:
+      enabled: true
+      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
+      receive-sound: "ENTITY_ITEM_PICKUP"
+      volume: 1.0
+      pitch: 1.0
 
   stoney:
     itemstack:
@@ -65,7 +83,32 @@ boomerangs:
       v: 3578
       type: STONE_SWORD
     is-itemstack: true
+    enchanted: true
     damage: 50
     travel-distance: 10
-    click-type: "left"
+    click-type: "left" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    sounds:
+      enabled: true
+      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
+      receive-sound: "ENTITY_ITEM_PICKUP"
+      volume: 1.0
+      pitch: 1.0
+
+  #This one gets thrown when you drop it, get it, dropper, haha? no funny? okay
+  dropper:
+    itemstack:
+      ==: org.bukkit.inventory.ItemStack
+      v: 3578
+      type: DROPPER
+    is-itemstack: true
+    damage: 50
+    travel-distance: 10
+    click-type: "drop" #Possible types: right, left, drop
+    cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    sounds:
+      enabled: true
+      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
+      receive-sound: "ENTITY_ITEM_PICKUP"
+      volume: 1.0
+      pitch: 1.0

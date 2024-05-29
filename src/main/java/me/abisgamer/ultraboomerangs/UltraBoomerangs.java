@@ -3,18 +3,17 @@ package me.abisgamer.ultraboomerangs;
 import me.abisgamer.ultraboomerangs.commands.giveCommand;
 import me.abisgamer.ultraboomerangs.commands.helpCommand;
 import me.abisgamer.ultraboomerangs.commands.mainCommand;
+import me.abisgamer.ultraboomerangs.commands.reloadCommand;
 import me.abisgamer.ultraboomerangs.listeners.throwListener;
 import me.abisgamer.ultraboomerangs.utils.configUpdater;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.plugin.EventExecutor;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -32,46 +31,49 @@ public final class UltraBoomerangs extends JavaPlugin {
         plugin.getLogger().info("UltraBoomerangs");
         plugin.getLogger().info("By - AbisGamer");
         plugin.getLogger().info("---------------------");
+
         getConfig().options().copyDefaults();
-        saveDefaultConfig();
         configUpdater.updateConfig();
+        saveDefaultConfig();
         reloadConfig();
         itemBuilder.createBoomerangs();
+
+        // Register commands
         this.getCommand("ultraboomerangs").setExecutor(new mainCommand());
-        String priorityName = plugin.getConfig().getString("listener.priority");
+
+        // Register listeners with priority from the config
+        registerListenersWithPriority();
+
+        // Setup custom messages file
+        setupMessagesFile();
+    }
+
+    private void registerListenersWithPriority() {
+        String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
         EventPriority priority;
         try {
             priority = EventPriority.valueOf(priorityName);
         } catch (IllegalArgumentException e) {
-            getLogger().warning("Invalid priority '" + priorityName + "' in config.yml. Using normal priority.");
+            getLogger().warning("Invalid priority '" + priorityName + "' in config.yml. Using NORMAL priority.");
             priority = EventPriority.NORMAL;
         }
-        getServer().getPluginManager().registerEvent(PlayerInteractEvent.class, new throwListener(), priority, new EventExecutor() {
-            public void execute(Listener listener, Event event) throws EventException {
-                if (listener instanceof throwListener && event instanceof PlayerInteractEvent) {
-                    ((throwListener) listener).onInteract((PlayerInteractEvent) event);
-                }
-            }
-        }, this);
-        File f = new File(getDataFolder()+ File.separator+"messages.yml");
-        if (!f.exists()) {
-            createMesssagesFile();
-        }
-        FileConfiguration fmessages = YamlConfiguration.loadConfiguration(f);
-        messages = fmessages;
+
+        throwListener listener = new throwListener();
+        getServer().getPluginManager().registerEvents(listener, this);
     }
 
     @Override
     public void onDisable() {
+        // Plugin shutdown logic
     }
 
     public void reloadCustomConfig() {
-        File f = new File(getDataFolder()+ File.separator+"messages.yml");
+        File f = new File(getDataFolder() + File.separator + "messages.yml");
         messages = YamlConfiguration.loadConfiguration(f);
     }
 
-    public void createMesssagesFile() {
-        File f = new File(getDataFolder()+ File.separator+"messages.yml");
+    public void createMessagesFile() {
+        File f = new File(getDataFolder() + File.separator + "messages.yml");
         if (!f.exists()) {
             try {
                 f.createNewFile();
@@ -82,7 +84,7 @@ public final class UltraBoomerangs extends JavaPlugin {
                 messages.set("id-error", "&cYou must provide a Boomerang ID");
                 messages.set("invalid", "&cThis boomerang does not exist!");
                 messages.set("limit-error", "&cYou already have a boomerang in the air!");
-                messages.set("reload", "&aSucessfully reloaded config.yml & messages.yml");
+                messages.set("reload", "&aSuccessfully reloaded config.yml & messages.yml");
                 messages.set("cooldown", "&cThis boomerang is on cooldown: &a");
                 messages.set("cooldown-2", " &aseconds!");
                 messages.save(f);
@@ -90,8 +92,13 @@ public final class UltraBoomerangs extends JavaPlugin {
                 e.printStackTrace();
             }
         }
-
     }
 
-
+    private void setupMessagesFile() {
+        File f = new File(getDataFolder() + File.separator + "messages.yml");
+        if (!f.exists()) {
+            createMessagesFile();
+        }
+        messages = YamlConfiguration.loadConfiguration(f);
+    }
 }
