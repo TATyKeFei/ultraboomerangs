@@ -1,5 +1,7 @@
 package me.abisgamer.ultraboomerangs.listeners;
 
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
+import com.gmail.nossr50.events.experience.McMMOPlayerXpGainEvent;
 import me.abisgamer.ultraboomerangs.UltraBoomerangs;
 import me.abisgamer.ultraboomerangs.utils.McMMOHelper;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
@@ -39,9 +41,12 @@ public class throwListener implements Listener {
     ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
     boolean updateOldBoomerangs = config.getBoolean("update-old-boomerangs", false);
 
-    public throwListener(ConfigurationSection config, boolean updateOldBoomerangs) {
+    private boolean isMcMMO;
+
+    public throwListener(ConfigurationSection config, boolean updateOldBoomerangs, boolean isMcMMO) {
         this.config = config;
         this.updateOldBoomerangs = updateOldBoomerangs;
+        this.isMcMMO = isMcMMO;
     }
 
     @EventHandler
@@ -93,6 +98,51 @@ public class throwListener implements Listener {
                         handleBoomerangThrow(player, itemInHand, key); // Pass the actual item in hand
                         event.setCancelled(true);
                     }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        Player player = event.getPlayer();
+        ConfigurationSection boomerangSection = config.getConfigurationSection("boomerangs");
+        FileConfiguration messages = UltraBoomerangs.plugin.messages;
+
+        if (boomerangSection != null) {
+            Set<String> keys = boomerangSection.getKeys(false);
+            for (String key : keys) {
+                String ConfigClickType = itemBuilder.clickType.get(key);
+                if (!Objects.equals(ConfigClickType, "drop")) {
+                    continue;
+                }
+                ItemStack boomerang = itemBuilder.boomerangs.get(key);
+                ItemStack itemDrop = event.getItemDrop().getItemStack();
+                if (isBoomerang(itemDrop, boomerang, key)) {
+                    // Check cooldown before removing the item
+                    Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
+                    if (cooldowns.containsKey(key)) {
+                        long secondsLeft = ((cooldowns.get(key) / 1000) + cooldownTime) - (System.currentTimeMillis() / 1000);
+                        if (secondsLeft > 0) {
+                            // Inform the player about the remaining cooldown time
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+
+                    // Remove one boomerang from the player's inventory
+                    ItemStack itemInHand = itemDrop.clone();
+                    if (itemDrop.getAmount() >= 1) {
+                        itemDrop.setAmount(itemDrop.getAmount() - 1);
+                    } else {
+                        event.getItemDrop().remove();
+                    }
+                    player.updateInventory(); // Ensure the inventory is updated
+
+                    handleBoomerangThrow(player, itemInHand, key); // Pass the actual dropped item
+                    event.setCancelled(true);
+                    break;
                 }
             }
         }
@@ -300,6 +350,13 @@ public class throwListener implements Listener {
                             count++;
                         }
                     }
+
+                    // Remove the player from playerBoomer when boomerang returns
+                    playerBoomer.get(player).remove(key);
+                    if (playerBoomer.get(player).isEmpty()) {
+                        playerBoomer.remove(player);
+                    }
+
                     cancel();
                 }
             } else {
@@ -315,9 +372,9 @@ public class throwListener implements Listener {
                             LivingEntity livingentity = (LivingEntity) entity;
                             double damage = itemBuilder.boomerDamage.get(key);
                             livingentity.damage(damage, player);
-                            UltraBoomerangs.plugin.getLogger().info("Tracking damage to: " + livingentity.getType().name() + " by player: " + player.getName());
+                            //UltraBoomerangs.plugin.getLogger().info("Tracking damage to: " + livingentity.getType().name() + " by player: " + player.getName());
                             damageTracker.computeIfAbsent(livingentity, k -> new ArrayList<>()).add(player);
-                            UltraBoomerangs.plugin.getLogger().info("Updated damageTracker: " + damageTracker);
+                            //UltraBoomerangs.plugin.getLogger().info("Updated damageTracker: " + damageTracker);
                         }
                     }
                 }
@@ -345,57 +402,82 @@ public class throwListener implements Listener {
                             count++;
                         }
                     }
+
+                    // Remove the player from playerBoomer when boomerang returns
+                    playerBoomer.get(player).remove(key);
+                    if (playerBoomer.get(player).isEmpty()) {
+                        playerBoomer.remove(player);
+                    }
+
                     cancel();
                 }
             }
         }
     }
 
+
+
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        UltraBoomerangs.plugin.getLogger().info("onEntityDamageByEntity triggered");
-        if (event.getDamager() instanceof ArmorStand) {
-            ArmorStand as = (ArmorStand) event.getDamager();
-            Player player = getPlayerForArmorStand(as);
-            if (player != null && event.getEntity() instanceof LivingEntity && !(event.getEntity() instanceof ArmorStand)) {
-                LivingEntity entity = (LivingEntity) event.getEntity();
-                UltraBoomerangs.plugin.getLogger().info("Damage dealt by: " + player.getName() + " to entity: " + entity.getType().name());
-                damageTracker.computeIfAbsent(entity, k -> new ArrayList<>()).add(player);
-                UltraBoomerangs.plugin.getLogger().info("Updated damageTracker: " + damageTracker);
-                double damage = itemBuilder.boomerDamage.get(getBoomerangKey(player));
-                entity.damage(damage, player);
+        if(isMcMMO == true) {
+            //UltraBoomerangs.plugin.getLogger().info("onEntityDamageByEntity triggered");
+            if (event.getDamager() instanceof ArmorStand) {
+                ArmorStand as = (ArmorStand) event.getDamager();
+                Player player = getPlayerForArmorStand(as);
+                if (player != null && event.getEntity() instanceof LivingEntity && !(event.getEntity() instanceof ArmorStand)) {
+                    LivingEntity entity = (LivingEntity) event.getEntity();
+                    //UltraBoomerangs.plugin.getLogger().info("Damage dealt by: " + player.getName() + " to entity: " + entity.getType().name());
+                    damageTracker.computeIfAbsent(entity, k -> new ArrayList<>()).add(player);
+                    //UltraBoomerangs.plugin.getLogger().info("Updated damageTracker: " + damageTracker);
+                    double damage = itemBuilder.boomerDamage.get(getBoomerangKey(player));
 
-                // Add experience on damage
-                String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
-                int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
-                String reason = (entity instanceof Player) ? "PVP" : "PVE";
-                UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDamageByEntity: " + skill);
-                UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
-                McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
+                    entity.damage(damage, player);
+                    //UltraBoomerangs.plugin.getLogger().info("Setting boomerangDamage flag to true in onEntityDamageByEntity");
+
+                    // Add experience on damage
+                    String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
+                    int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
+                    String reason = (entity instanceof Player) ? "PVP" : "PVE";
+                    //UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDamageByEntity: " + skill);
+                    //UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
+                    McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
+                }
             }
         }
     }
 
+
+
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-        LivingEntity entity = event.getEntity();
-        UltraBoomerangs.plugin.getLogger().info("onEntityDeath triggered for entity: " + entity.getType().name());
-        UltraBoomerangs.plugin.getLogger().info("Current damageTracker: " + damageTracker);
+        if (isMcMMO == true) {
+            LivingEntity entity = event.getEntity();
+            //.plugin.getLogger().info("onEntityDeath triggered for entity: " + entity.getType().name());
+            //UltraBoomerangs.plugin.getLogger().info("Current damageTracker: " + damageTracker);
 
-        Bukkit.getScheduler().runTaskLater(UltraBoomerangs.plugin, () -> {
-            List<Player> players = damageTracker.get(entity);
-            if (players != null && !players.isEmpty()) {
-                Player player = players.get(players.size() - 1); // Get the last player who damaged the entity
-                String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
-                int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
-                String reason = (entity instanceof Player) ? "PVP" : "PVE";
-                UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDeath: " + skill);
-                UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
-                McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
-            } else {
-                UltraBoomerangs.plugin.getLogger().info("Player is null in onEntityDeath");
-            }
-        }, 5L); // 1 tick delay
+            boolean wasBoomerangDamage = damageTracker.containsKey(entity);
+            //UltraBoomerangs.plugin.getLogger().info("Setting boomerangDamage flag in onEntityDeath: " + wasBoomerangDamage);
+
+            Bukkit.getScheduler().runTaskLater(UltraBoomerangs.plugin, () -> {
+                List<Player> players = damageTracker.get(entity);
+                if (players != null && !players.isEmpty()) {
+                    Player player = players.get(players.size() - 1); // Get the last player who damaged the entity
+                    String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
+                    int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
+                    String reason = (entity instanceof Player) ? "PVP" : "PVE";
+                    //UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDeath: " + skill);
+                    //UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
+                    McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
+                } else {
+                    //UltraBoomerangs.plugin.getLogger().info("Player is null in onEntityDeath");
+                }
+
+                // Reset the flag after processing the death event
+                //UltraBoomerangs.plugin.getLogger().info("Resetting boomerangDamage flag in onEntityDeath");
+            }, 1L); // 1 tick delay
+        }
     }
-
 }
+
+
+

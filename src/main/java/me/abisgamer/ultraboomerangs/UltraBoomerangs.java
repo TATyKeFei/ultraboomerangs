@@ -1,24 +1,27 @@
 package me.abisgamer.ultraboomerangs;
 
-import me.abisgamer.ultraboomerangs.commands.giveCommand;
-import me.abisgamer.ultraboomerangs.commands.helpCommand;
 import me.abisgamer.ultraboomerangs.commands.mainCommand;
-import me.abisgamer.ultraboomerangs.commands.reloadCommand;
+import me.abisgamer.ultraboomerangs.listeners.mcMMOListener;
 import me.abisgamer.ultraboomerangs.listeners.throwListener;
 import me.abisgamer.ultraboomerangs.utils.configUpdater;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class UltraBoomerangs extends JavaPlugin {
 
     public static UltraBoomerangs plugin;
     public FileConfiguration messages;
+
+    public static boolean isMcMMO = false;
 
     @Override
     public void onEnable() {
@@ -38,6 +41,8 @@ public final class UltraBoomerangs extends JavaPlugin {
         // Register listeners with priority from the config
         if (getServer().getPluginManager().getPlugin("mcMMO") != null) {
             plugin.getLogger().info("mcMMO detected, Enabled support for mcMMO.");
+            getServer().getPluginManager().registerEvents(new mcMMOListener(), this); // Register the new mcMMO experience listener
+            isMcMMO = true;
         }
         registerListenersWithPriority();
 
@@ -59,7 +64,7 @@ public final class UltraBoomerangs extends JavaPlugin {
             priority = EventPriority.NORMAL;
         }
 
-        throwListener listener = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false));
+        throwListener listener = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO);
 
         getServer().getPluginManager().registerEvents(listener, this);
     }

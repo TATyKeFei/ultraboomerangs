@@ -23,12 +23,12 @@ public class McMMOHelper {
         skill = skill.toUpperCase(); // Ensure skill is in uppercase
 
         if (!VALID_SKILLS.contains(skill)) {
-            Bukkit.getLogger().severe("Invalid mcMMO skill type: " + skill);
+            //Bukkit.getLogger().severe("Invalid mcMMO skill type: " + skill);
             return;
         }
 
         try {
-            Bukkit.getLogger().info("Adding " + xpAmount + " XP to skill " + skill + " for player " + player.getName());
+            //Bukkit.getLogger().info("Adding " + xpAmount + " XP to skill " + skill + " for player " + player.getName());
             ExperienceAPI.addRawXP(player, skill, xpAmount, reason);
         } catch (McMMOPlayerNotFoundException e) {
             // Schedule a retry if the player's profile is not yet loaded
@@ -42,7 +42,7 @@ public class McMMOHelper {
                 }
             }, 20L); // 20 ticks = 1 second delay
         } catch (ClassCastException e) {
-            Bukkit.getLogger().severe("ClassCastException: Ensure mcMMO is properly loaded and not duplicated.");
+            //Bukkit.getLogger().severe("ClassCastException: Ensure mcMMO is properly loaded and not duplicated.");
             e.printStackTrace();
         }
     }
