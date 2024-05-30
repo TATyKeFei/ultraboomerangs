@@ -10,10 +10,6 @@ import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -40,7 +36,7 @@ public final class UltraBoomerangs extends JavaPlugin {
         this.getCommand("ultraboomerangs").setExecutor(new mainCommand());
 
         // Register listeners with priority from the config
-        if(getServer().getPluginManager().getPlugin("mcMMO") != null){
+        if (getServer().getPluginManager().getPlugin("mcMMO") != null) {
             plugin.getLogger().info("mcMMO detected, Enabled support for mcMMO.");
         }
         registerListenersWithPriority();
@@ -65,33 +61,7 @@ public final class UltraBoomerangs extends JavaPlugin {
 
         throwListener listener = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false));
 
-        getServer().getPluginManager().registerEvent(PlayerInteractEvent.class, listener, priority,
-                (listener1, event) -> {
-                    if (listener1 instanceof throwListener && event instanceof PlayerInteractEvent) {
-                        ((throwListener) listener1).onInteract((PlayerInteractEvent) event);
-                    }
-                }, this);
-
-        getServer().getPluginManager().registerEvent(PlayerDropItemEvent.class, listener, priority,
-                (listener1, event) -> {
-                    if (listener1 instanceof throwListener && event instanceof PlayerDropItemEvent) {
-                        ((throwListener) listener1).onPlayerDropItem((PlayerDropItemEvent) event);
-                    }
-                }, this);
-
-        getServer().getPluginManager().registerEvent(PlayerQuitEvent.class, listener, priority,
-                (listener1, event) -> {
-                    if (listener1 instanceof throwListener && event instanceof PlayerQuitEvent) {
-                        ((throwListener) listener1).onPlayerDisconnect((PlayerQuitEvent) event);
-                    }
-                }, this);
-
-        getServer().getPluginManager().registerEvent(PluginDisableEvent.class, listener, priority,
-                (listener1, event) -> {
-                    if (listener1 instanceof throwListener && event instanceof PluginDisableEvent) {
-                        ((throwListener) listener1).onPluginDisable((PluginDisableEvent) event);
-                    }
-                }, this);
+        getServer().getPluginManager().registerEvents(listener, this);
     }
 
     @Override
