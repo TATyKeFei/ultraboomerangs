@@ -2,62 +2,61 @@ package me.abisgamer.ultraboomerangs.utils;
 
 import me.abisgamer.ultraboomerangs.UltraBoomerangs;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.Set;
 
 public class configUpdater {
     public static void updateConfig() {
-        UltraBoomerangs plugin = UltraBoomerangs.plugin;
-        FileConfiguration config = plugin.getConfig();
-
-        // Add armorstand rotation config if it doesn't exist
+        ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
+        //Add rotation config
         if (!config.getKeys(false).contains("armorstand")) {
-            ConfigurationSection armorstandSection = config.createSection("armorstand");
-            armorstandSection.set("x", 0);
-            armorstandSection.set("y", 120);
-            armorstandSection.set("z", 0);
+            config.createSection("armorstand");
+            config.set("armorstand.x", 0);
+            config.set("armorstand.y", 120);
+            config.set("armorstand.z", 0);
             UltraBoomerangs.plugin.saveConfig();
             UltraBoomerangs.plugin.reloadConfig();
-            plugin.getLogger().info("Updated config to add Armorstand Arm Rotation section.");
+            UltraBoomerangs.plugin.getLogger().info("Updated config to add Armorstand Arm Rotation section.");
         }
 
-        // Add sounds section for each boomerang if it doesn't exist
         ConfigurationSection boomerangSection = config.getConfigurationSection("boomerangs");
         if (boomerangSection != null) {
             Set<String> keys = boomerangSection.getKeys(false); // Get only direct children
             for (String key : keys) {
                 ConfigurationSection currentSection = boomerangSection.getConfigurationSection(key);
-                if (currentSection != null) {
-                    if (!currentSection.isConfigurationSection("sounds")) {
-                        ConfigurationSection soundsSection = currentSection.createSection("sounds");
-                        soundsSection.set("enabled", true);
-                        soundsSection.set("throw-sound", "ENTITY_EXPERIENCE_BOTTLE_THROW");
-                        soundsSection.set("receive-sound", "ENTITY_EXPERIENCE_BOTTLE_THROW");
-                        soundsSection.set("volume", 0.4);
-                        soundsSection.set("pitch", 0.4);
-                        UltraBoomerangs.plugin.saveConfig();
-                        UltraBoomerangs.plugin.reloadConfig();
-                        plugin.getLogger().info("Updated config to add sounds");
-                    }
+                if (!currentSection.getKeys(false).contains("sounds")) {
+                    currentSection.createSection("sounds");
+                    currentSection.set("sounds.enabled", true);
+                    currentSection.set("sounds.throw-sound", "ENTITY_EXPERIENCE_BOTTLE_THROW");
+                    currentSection.set("sounds.recieve-sound", "ENTITY_EXPERIENCE_BOTTLE_THROW");
+                    currentSection.set("sounds.volume", 0.4);
+                    currentSection.set("sounds.pitch", 0.4);
                 }
+                if (!currentSection.getKeys(false).contains("mcmmo_skill")) {
+                    currentSection.createSection("mcmmo_skill");
+                    currentSection.set("mcmmo_skill", "Archery");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add mcmmo_skill section");
+                }
+                if (!currentSection.getKeys(false).contains("mcmmo_skill_amount")) {
+                    currentSection.createSection("mcmmo_skill_amount");
+                    currentSection.set("mcmmo_skill_amount", "0");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add mcmmo_skill_amount section");
+                }
+
             }
         }
-
-        // Add listener priority config if it doesn't exist
         if (!config.getKeys(false).contains("listener")) {
-            ConfigurationSection listenerSection = config.createSection("listener");
-            listenerSection.set("priority", "NORMAL");
-            plugin.getLogger().info("Updated config to add listener priority section.");
+            config.createSection("listener");
+            config.set("listener.priority", "NORMAL");
+            UltraBoomerangs.plugin.getLogger().info("Updated config to add listener priority section");
         }
 
         // Add update-old-boomerangs config if it doesn't exist
         if (!config.getKeys(false).contains("update-old-boomerangs")) {
             config.set("update-old-boomerangs", true); // Default to true
-            UltraBoomerangs.plugin.saveConfig();
-            UltraBoomerangs.plugin.reloadConfig();
-            plugin.getLogger().info("Updated config to add update-old-boomerangs option.");
+            UltraBoomerangs.plugin.getLogger().info("Updated config to add update-old-boomerangs option.");
         }
+            UltraBoomerangs.plugin.saveConfig();
 
     }
 }

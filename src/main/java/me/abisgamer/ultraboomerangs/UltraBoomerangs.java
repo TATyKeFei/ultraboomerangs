@@ -31,21 +31,26 @@ public final class UltraBoomerangs extends JavaPlugin {
         plugin.getLogger().info("UltraBoomerangs");
         plugin.getLogger().info("By - AbisGamer");
         plugin.getLogger().info("---------------------");
-
         getConfig().options().copyDefaults();
-        configUpdater.updateConfig();
         saveDefaultConfig();
         reloadConfig();
+        configUpdater.updateConfig();
+        reloadConfig();
         itemBuilder.createBoomerangs();
-
-        // Register commands
         this.getCommand("ultraboomerangs").setExecutor(new mainCommand());
 
         // Register listeners with priority from the config
+        if(getServer().getPluginManager().getPlugin("mcMMO") != null){
+            plugin.getLogger().info("mcMMO detected, Enabled support for mcMMO.");
+        }
         registerListenersWithPriority();
 
-        // Setup custom messages file
-        setupMessagesFile();
+        File f = new File(getDataFolder() + File.separator + "messages.yml");
+        if (!f.exists()) {
+            createMessagesFile();
+        }
+        FileConfiguration fmessages = YamlConfiguration.loadConfiguration(f);
+        messages = fmessages;
     }
 
     private void registerListenersWithPriority() {
@@ -58,13 +63,39 @@ public final class UltraBoomerangs extends JavaPlugin {
             priority = EventPriority.NORMAL;
         }
 
-        throwListener listener = new throwListener();
-        getServer().getPluginManager().registerEvents(listener, this);
+        throwListener listener = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false));
+
+        getServer().getPluginManager().registerEvent(PlayerInteractEvent.class, listener, priority,
+                (listener1, event) -> {
+                    if (listener1 instanceof throwListener && event instanceof PlayerInteractEvent) {
+                        ((throwListener) listener1).onInteract((PlayerInteractEvent) event);
+                    }
+                }, this);
+
+        getServer().getPluginManager().registerEvent(PlayerDropItemEvent.class, listener, priority,
+                (listener1, event) -> {
+                    if (listener1 instanceof throwListener && event instanceof PlayerDropItemEvent) {
+                        ((throwListener) listener1).onPlayerDropItem((PlayerDropItemEvent) event);
+                    }
+                }, this);
+
+        getServer().getPluginManager().registerEvent(PlayerQuitEvent.class, listener, priority,
+                (listener1, event) -> {
+                    if (listener1 instanceof throwListener && event instanceof PlayerQuitEvent) {
+                        ((throwListener) listener1).onPlayerDisconnect((PlayerQuitEvent) event);
+                    }
+                }, this);
+
+        getServer().getPluginManager().registerEvent(PluginDisableEvent.class, listener, priority,
+                (listener1, event) -> {
+                    if (listener1 instanceof throwListener && event instanceof PluginDisableEvent) {
+                        ((throwListener) listener1).onPluginDisable((PluginDisableEvent) event);
+                    }
+                }, this);
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
     }
 
     public void reloadCustomConfig() {
@@ -92,13 +123,5 @@ public final class UltraBoomerangs extends JavaPlugin {
                 e.printStackTrace();
             }
         }
-    }
-
-    private void setupMessagesFile() {
-        File f = new File(getDataFolder() + File.separator + "messages.yml");
-        if (!f.exists()) {
-            createMessagesFile();
-        }
-        messages = YamlConfiguration.loadConfiguration(f);
     }
 }

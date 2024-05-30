@@ -14,13 +14,14 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 
 public class itemBuilder {
-
     public static HashMap<String, ItemStack> boomerangs = new HashMap<>();
     public static HashMap<String, Integer> boomerDamage = new HashMap<>();
     public static HashMap<String, Integer> travelDistance = new HashMap<>();
     public static HashMap<String, Long> cooldownTime = new HashMap<>();
     public static HashMap<String, String> clickType = new HashMap<>();
     public static HashMap<String, Boolean> supportDurability = new HashMap<>();
+    public static HashMap<String, String> mcmmoSkills = new HashMap<>();
+    public static HashMap<String, Integer> mcmmoSkillAmounts = new HashMap<>();
 
     public static void createBoomerangs() {
         ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
@@ -41,6 +42,8 @@ public class itemBuilder {
                 boolean isItemstack = config.getBoolean("boomerangs." + key + ".is-itemstack");
                 ItemStack boomerItemStack = config.getItemStack("boomerangs." + key + ".itemstack");
                 boolean supportDurabilityOption = config.getBoolean("boomerangs." + key + ".support-durability", false);
+                String mcmmoSkill = config.getString("boomerangs." + key + ".mcmmo_skill", "none");
+                int mcmmoSkillAmount = config.getInt("boomerangs." + key + ".mcmmo_skill_amount", 0);
 
                 ItemStack boomerang;
                 if (!isItemstack) {
@@ -73,6 +76,8 @@ public class itemBuilder {
                 clickType.put(key, BoomClickType);
                 cooldownTime.put(key, coolDown);
                 supportDurability.put(key, supportDurabilityOption);
+                mcmmoSkills.put(key, mcmmoSkill);
+                mcmmoSkillAmounts.put(key, mcmmoSkillAmount);
 
                 UltraBoomerangs.plugin.getLogger().info("Loaded Boomerang: " + key);
             }

@@ -1,6 +1,7 @@
 package me.abisgamer.ultraboomerangs.listeners;
 
 import me.abisgamer.ultraboomerangs.UltraBoomerangs;
+import me.abisgamer.ultraboomerangs.utils.McMMOHelper;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -9,6 +10,8 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -30,8 +33,15 @@ public class throwListener implements Listener {
     public static HashMap<Player, ArrayList<Entity>> armorStandEntity = new HashMap<>();
     public static HashMap<Player, HashMap<String, ArrayList<ItemStack>>> playerBoomer = new HashMap<>();
     public static HashMap<String, Long> cooldowns = new HashMap<>();
+    private final HashMap<LivingEntity, Player> damageTracker = new HashMap<>();
+
     ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
     boolean updateOldBoomerangs = config.getBoolean("update-old-boomerangs", false);
+
+    public throwListener(ConfigurationSection config, boolean updateOldBoomerangs) {
+        this.config = config;
+        this.updateOldBoomerangs = updateOldBoomerangs;
+    }
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
@@ -88,6 +98,37 @@ public class throwListener implements Listener {
     }
 
     @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof ArmorStand) {
+            ArmorStand as = (ArmorStand) event.getDamager();
+            Player player = getPlayerForArmorStand(as);
+            if (player != null && event.getEntity() instanceof LivingEntity) {
+                LivingEntity entity = (LivingEntity) event.getEntity();
+                damageTracker.put(entity, player);
+                double damage = itemBuilder.boomerDamage.get(getBoomerangKey(player));
+                entity.damage(damage, player);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityDeath(EntityDeathEvent event) {
+        LivingEntity entity = event.getEntity();
+        Player player = damageTracker.remove(entity);
+        if (player != null) {
+            String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
+            int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
+            String reason = (entity instanceof Player) ? "PVP" : "PVE";
+            McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        damageTracker.values().removeIf(player -> player.equals(event.getPlayer()));
+    }
+
+    @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
         ConfigurationSection boomerangSection = config.getConfigurationSection("boomerangs");
@@ -130,6 +171,68 @@ public class throwListener implements Listener {
                 }
             }
         }
+    }
+
+    private Player getPlayerForArmorStand(ArmorStand as) {
+        for (Player player : armorStandEntity.keySet()) {
+            if (armorStandEntity.get(player).contains(as)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    private String getBoomerangKey(Player player) {
+        for (String key : playerBoomer.get(player).keySet()) {
+            return key;
+        }
+        return null;
+    }
+
+    private void handleBoomerangThrow(Player player, ItemStack itemInHand, String key) {
+        FileConfiguration messages = UltraBoomerangs.plugin.messages;
+        Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
+        if (cooldowns.containsKey(key)) {
+            long secondsLeft = ((cooldowns.get(key) / 1000) + cooldownTime) - (System.currentTimeMillis() / 1000);
+            if (secondsLeft > 0) {
+                // Inform the player about the remaining cooldown time
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
+                return;
+            }
+        }
+
+        ConfigurationSection soundSection = config.getConfigurationSection("boomerangs." + key + ".sounds");
+        if (soundSection != null && soundSection.getBoolean("enabled")) {
+            String throwSoundName = soundSection.getString("throw-sound");
+            float volume = (float) soundSection.getDouble("volume");
+            float pitch = (float) soundSection.getDouble("pitch");
+            if (throwSoundName != null) {
+                Sound throwSound = Sound.valueOf(throwSoundName);
+                player.playSound(player.getLocation(), throwSound, volume, pitch);
+            }
+        }
+
+        ItemStack thrownBoomerang = itemInHand.clone(); // Clone the item to preserve its state
+        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(player.getEyeLocation().subtract(0, 0.5, 0), EntityType.ARMOR_STAND);
+        as.setVisible(false);
+        as.setArms(true);
+        as.setGravity(false);
+        as.setMarker(true);
+        as.setItemInHand(thrownBoomerang);
+        as.setRightArmPose(new EulerAngle(Math.toRadians(config.getInt("armorstand.x")), Math.toRadians(config.getInt("armorstand.y")), Math.toRadians(config.getInt("armorstand.z"))));
+
+        ArrayList<Entity> armorEntity = armorStandEntity.computeIfAbsent(player, k -> new ArrayList<>());
+        armorEntity.add(as);
+
+        HashMap<String, ArrayList<ItemStack>> existingItemsMap = playerBoomer.computeIfAbsent(player, k -> new HashMap<>());
+        ArrayList<ItemStack> existingItems = existingItemsMap.computeIfAbsent(key, k -> new ArrayList<>());
+        existingItems.add(thrownBoomerang);
+
+        // Update the cooldown time
+        cooldowns.put(key, System.currentTimeMillis());
+
+        final ArrayList<ItemStack> finalExistingItems = existingItems; // Make final for inner class
+        new BoomerangReturnTask(player, as, key, finalExistingItems, soundSection).runTaskTimer(UltraBoomerangs.plugin, 1L, 1L);
     }
 
     private boolean isBoomerang(ItemStack item, ItemStack boomerang, String key) {
@@ -208,53 +311,6 @@ public class throwListener implements Listener {
         }
     }
 
-    private void handleBoomerangThrow(Player player, ItemStack itemInHand, String key) {
-        FileConfiguration messages = UltraBoomerangs.plugin.messages;
-        Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
-        if (cooldowns.containsKey(key)) {
-            long secondsLeft = ((cooldowns.get(key) / 1000) + cooldownTime) - (System.currentTimeMillis() / 1000);
-            if (secondsLeft > 0) {
-                // Inform the player about the remaining cooldown time
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
-                return;
-            }
-        }
-
-        ConfigurationSection soundSection = config.getConfigurationSection("boomerangs." + key + ".sounds");
-        if (soundSection != null && soundSection.getBoolean("enabled")) {
-            String throwSoundName = soundSection.getString("throw-sound");
-            float volume = (float) soundSection.getDouble("volume");
-            float pitch = (float) soundSection.getDouble("pitch");
-            if (throwSoundName != null) {
-                Sound throwSound = Sound.valueOf(throwSoundName);
-                player.playSound(player.getLocation(), throwSound, volume, pitch);
-            }
-        }
-
-        ItemStack thrownBoomerang = itemInHand.clone(); // Clone the item to preserve its state
-        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(player.getEyeLocation().subtract(0, 0.5, 0), EntityType.ARMOR_STAND);
-        as.setVisible(false);
-        as.setArms(true);
-        as.setGravity(false);
-        as.setMarker(true);
-        Location destination = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(10));
-        as.setItemInHand(thrownBoomerang);
-        as.setRightArmPose(new EulerAngle(Math.toRadians(config.getInt("armorstand.x")), Math.toRadians(config.getInt("armorstand.y")), Math.toRadians(config.getInt("armorstand.z"))));
-
-        ArrayList<Entity> armorEntity = armorStandEntity.computeIfAbsent(player, k -> new ArrayList<>());
-        armorEntity.add(as);
-
-        HashMap<String, ArrayList<ItemStack>> existingItemsMap = playerBoomer.computeIfAbsent(player, k -> new HashMap<>());
-        ArrayList<ItemStack> existingItems = existingItemsMap.computeIfAbsent(key, k -> new ArrayList<>());
-        existingItems.add(thrownBoomerang);
-
-        // Update the cooldown time
-        cooldowns.put(key, System.currentTimeMillis());
-
-        final ArrayList<ItemStack> finalExistingItems = existingItems; // Make final for inner class
-        new BoomerangReturnTask(player, as, key, finalExistingItems, soundSection).runTaskTimer(UltraBoomerangs.plugin, 1L, 1L);
-    }
-
     private void playReceiveSound(Player player, ConfigurationSection soundSection) {
         if (soundSection != null && soundSection.getBoolean("enabled")) {
             String receiveSoundName = soundSection.getString("receive-sound");
@@ -330,7 +386,9 @@ public class throwListener implements Listener {
                     if (as.getLocation().distanceSquared(entity.getLocation()) < 1) {
                         if (entity != player && entity instanceof LivingEntity) {
                             LivingEntity livingentity = (LivingEntity) entity;
-                            livingentity.damage(itemBuilder.boomerDamage.get(key), player);
+                            double damage = itemBuilder.boomerDamage.get(key);
+                            livingentity.damage(damage, player);
+                            damageTracker.put(livingentity, player);
                         }
                     }
                 }

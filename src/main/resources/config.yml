@@ -28,6 +28,8 @@ boomerangs:
     travel-distance: 5 #How far the boomerang should travel when thrown
     click-type: "drop" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 #the amount of xp to give
     sounds:
       enabled: true
       throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
@@ -49,6 +51,8 @@ boomerangs:
     travel-distance: 10
     click-type: "right" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 #the amount of xp to give
     sounds:
       enabled: true
       throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
@@ -70,6 +74,8 @@ boomerangs:
     travel-distance: 15
     click-type: "left" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 #the amount of xp to give
     sounds:
       enabled: true
       throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
@@ -88,6 +94,8 @@ boomerangs:
     travel-distance: 10
     click-type: "left" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 #the amount of xp to give
     sounds:
       enabled: true
       throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
@@ -106,6 +114,8 @@ boomerangs:
     travel-distance: 10
     click-type: "drop" #Possible types: right, left, drop
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 #the amount of xp to give
     sounds:
       enabled: true
       throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
