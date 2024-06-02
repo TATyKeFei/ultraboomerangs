@@ -64,12 +64,14 @@ public final class UltraBoomerangs extends JavaPlugin {
         messages = fmessages;
     }
 
+
     public void registerAllListeners() {
         // Create throwListener with correct flags
         throwListenerInstance = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO, isAuraSkills);
 
         // Register listeners with priority from the config
         registerListenersWithPriority(throwListenerInstance);
+        registerUpdateListenersWithPriority(throwListenerInstance);
 
         // Register mcMMOListener if mcMMO is present
         if (isMcMMO) {
@@ -81,6 +83,40 @@ public final class UltraBoomerangs extends JavaPlugin {
             getServer().getPluginManager().registerEvents(new auraSkillsListener(this, throwListenerInstance), this);
         }
     }
+
+    public void registerAllUpdateListeners() {
+        // Create throwListener with correct flags
+        throwListenerInstance = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO, isAuraSkills);
+
+        registerUpdateListenersWithPriority(throwListenerInstance);
+    }
+
+    private void registerUpdateListenersWithPriority(throwListener listener) {
+        String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
+        EventPriority priority;
+        try {
+            priority = EventPriority.valueOf(priorityName);
+        } catch (IllegalArgumentException e) {
+            getLogger().warning("Invalid priority '" + priorityName + "' in config.yml. Using NORMAL priority.");
+            priority = EventPriority.NORMAL;
+        }
+
+        PluginManager pluginManager = getServer().getPluginManager();
+        EventExecutor executor = (listener1, event) -> {
+            if (event instanceof org.bukkit.event.player.PlayerInteractEvent) {
+                listener.onPlayerInteract((org.bukkit.event.player.PlayerInteractEvent) event);
+            }
+            if (event instanceof org.bukkit.event.inventory.InventoryClickEvent) { // Register InventoryClickEvent
+                listener.onInventoryClick((org.bukkit.event.inventory.InventoryClickEvent) event);
+            }
+
+        };
+
+        pluginManager.registerEvent(org.bukkit.event.inventory.InventoryClickEvent.class, listener, priority, executor, this); // Add InventoryClickEvent registration
+        pluginManager.registerEvent(org.bukkit.event.player.PlayerInteractEvent.class, listener, priority, executor, this); // Add InventoryClickEvent registration
+
+    }
+
     private void registerListenersWithPriority(throwListener listener) {
         String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
         EventPriority priority;
@@ -111,12 +147,8 @@ public final class UltraBoomerangs extends JavaPlugin {
             if (event instanceof org.bukkit.event.entity.EntityDeathEvent) {
                 listener.onEntityDeath((org.bukkit.event.entity.EntityDeathEvent) event);
             }
-            if (event instanceof org.bukkit.event.inventory.InventoryClickEvent) { // Register InventoryClickEvent
-                listener.onInventoryClick((org.bukkit.event.inventory.InventoryClickEvent) event);
-            }
-            if (event instanceof org.bukkit.event.player.PlayerInteractEvent) { // Register PlayerInteractEvent for item meta update
-                listener.onPlayerInteract((org.bukkit.event.player.PlayerInteractEvent) event);
-            }
+
+
         };
 
         pluginManager.registerEvent(org.bukkit.event.player.PlayerInteractEvent.class, listener, priority, executor, this);
@@ -125,8 +157,7 @@ public final class UltraBoomerangs extends JavaPlugin {
         pluginManager.registerEvent(org.bukkit.event.server.PluginDisableEvent.class, listener, priority, executor, this);
         pluginManager.registerEvent(org.bukkit.event.entity.EntityDamageByEntityEvent.class, listener, priority, executor, this);
         pluginManager.registerEvent(org.bukkit.event.entity.EntityDeathEvent.class, listener, priority, executor, this);
-        pluginManager.registerEvent(org.bukkit.event.inventory.InventoryClickEvent.class, listener, priority, executor, this); // Add InventoryClickEvent registration
-        pluginManager.registerEvent(org.bukkit.event.player.PlayerInteractEvent.class, listener, priority, executor, this); // Add PlayerInteractEvent registration
+
     }
     @Override
     public void onDisable() {

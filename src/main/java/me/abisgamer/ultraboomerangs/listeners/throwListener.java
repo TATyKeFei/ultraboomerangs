@@ -481,7 +481,7 @@ public class throwListener implements Listener {
                 if (!as.isDead()) {
                     as.remove();
                     ItemStack latestBoomerang = itemBuilder.boomerangs.get(key).clone();
-                    latestBoomerang = updateItemMeta(latestBoomerang, key); // Get the latest boomerang from config
+                    //latestBoomerang = updateItemMeta(latestBoomerang, key); // Get the latest boomerang from config
                     if (player.getInventory().firstEmpty() != -1) {
                         player.getInventory().addItem(latestBoomerang);
                         playReceiveSound(player, soundSection);

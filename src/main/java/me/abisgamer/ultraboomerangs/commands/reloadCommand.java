@@ -17,7 +17,7 @@ public class reloadCommand implements CommandExecutor {
             UltraBoomerangs.plugin.reloadConfig();
             UltraBoomerangs.plugin.reloadCustomConfig();
             itemBuilder.createBoomerangs();  // Reinitialize itemBuilder to update boomerangs map
-            UltraBoomerangs.plugin.registerAllListeners(); // Re-register listeners after reload
+            UltraBoomerangs.plugin.registerAllUpdateListeners(); // Re-register listeners after reload
 
 
             if (sender instanceof Player) {
