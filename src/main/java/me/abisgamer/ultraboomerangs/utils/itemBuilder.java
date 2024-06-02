@@ -25,6 +25,7 @@ public class itemBuilder {
 
     public static void createBoomerangs() {
         ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
+        UltraBoomerangs.plugin.reloadConfig();
         ConfigurationSection boomerangSection = config.getConfigurationSection("boomerangs");
 
         if (boomerangSection != null) {

@@ -1,7 +1,6 @@
 package me.abisgamer.ultraboomerangs.commands;
 
 import me.abisgamer.ultraboomerangs.UltraBoomerangs;
-import me.abisgamer.ultraboomerangs.utils.configUpdater;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -17,7 +16,9 @@ public class reloadCommand implements CommandExecutor {
         if (cmd.getName().equalsIgnoreCase("ultraboomerangs")) {
             UltraBoomerangs.plugin.reloadConfig();
             UltraBoomerangs.plugin.reloadCustomConfig();
-            itemBuilder.createBoomerangs();
+            itemBuilder.createBoomerangs();  // Reinitialize itemBuilder to update boomerangs map
+            UltraBoomerangs.plugin.registerAllListeners(); // Re-register listeners after reload
+
 
             if (sender instanceof Player) {
                 Player player = (Player) sender;

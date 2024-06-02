@@ -13,12 +13,14 @@ import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -50,7 +52,6 @@ public class throwListener implements Listener {
 
     private boolean isMcMMO;
     private boolean isAuraSkills;
-
 
     public throwListener(ConfigurationSection config, boolean updateOldBoomerangs, boolean isMcMMO, boolean isAuraSkills) {
         this.config = config;
@@ -105,7 +106,7 @@ public class throwListener implements Listener {
                         }
                         player.updateInventory(); // Ensure the inventory is updated
 
-                        handleBoomerangThrow(player, itemInHand, key); // Pass the actual item in hand
+                        handleBoomerangThrow(player, updateItemMeta(itemInHand.clone(), key), key); // Pass the updated item
                         event.setCancelled(true);
                     }
                 }
@@ -150,7 +151,7 @@ public class throwListener implements Listener {
                     }
                     player.updateInventory(); // Ensure the inventory is updated
 
-                    handleBoomerangThrow(player, itemInHand, key); // Pass the actual dropped item
+                    handleBoomerangThrow(player, updateItemMeta(itemInHand.clone(), key), key); // Pass the updated item
                     event.setCancelled(true);
                     break;
                 }
@@ -199,7 +200,10 @@ public class throwListener implements Listener {
             }
         }
 
-        ItemStack thrownBoomerang = itemInHand.clone(); // Clone the item to preserve its state
+        plugin.getLogger().info("Before updating thrown boomerang: " + itemInHand);
+        ItemStack thrownBoomerang = updateItemMeta(itemInHand.clone(), key); // Clone and update the item
+        plugin.getLogger().info("After updating thrown boomerang: " + thrownBoomerang);
+
         ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(player.getEyeLocation().subtract(0, 0.5, 0), EntityType.ARMOR_STAND);
         as.setVisible(false);
         as.setArms(true);
@@ -229,13 +233,18 @@ public class throwListener implements Listener {
 
         ItemMeta meta = item.getItemMeta();
         if (meta != null && meta.getPersistentDataContainer().has(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING)) {
-            return key.equals(meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING));
+            boolean matches = key.equals(meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING));
+            if (matches) {
+                updateItemMeta(item, key);
+            }
+            return matches;
         }
 
         if (updateOldBoomerangs) {
             if (item.isSimilar(boomerang)) {
                 meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING, key);
                 item.setItemMeta(meta);
+                updateItemMeta(item, key);
                 return true;
             }
         }
@@ -298,6 +307,95 @@ public class throwListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = player.getInventory().getItemInMainHand();
+        if (item == null || item.getType() == Material.AIR) return;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        // Check if the item is a boomerang using PDC
+        if (meta.getPersistentDataContainer().has(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING)) {
+            String key = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING);
+            ConfigurationSection boomerangConfig = config.getConfigurationSection("boomerangs." + key);
+            if (boomerangConfig != null) {
+                updateItemMeta(item, key);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        ItemStack item = event.getCurrentItem();
+        if (item == null || item.getType() == Material.AIR) return;
+
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        // Check if the item is a boomerang using PDC
+        if (meta.getPersistentDataContainer().has(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING)) {
+            String key = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING);
+            ConfigurationSection boomerangConfig = config.getConfigurationSection("boomerangs." + key);
+            if (boomerangConfig != null) {
+                updateItemMeta(item, key);
+            }
+        }
+    }
+
+    private ItemStack updateItemMeta(ItemStack item, String key) {
+        if (item == null || key == null) return item;
+
+        ConfigurationSection boomerangConfig = config.getConfigurationSection("boomerangs." + key);
+        if (boomerangConfig == null) return item;
+
+        boolean isItemstack = boomerangConfig.getBoolean("is-itemstack");
+        ItemStack configuredItemStack = boomerangConfig.getItemStack("itemstack");
+
+        if (isItemstack && configuredItemStack != null) {
+            // Use the entire item stack from the config
+            item.setType(configuredItemStack.getType());
+            item.setAmount(configuredItemStack.getAmount());
+            ItemMeta meta = configuredItemStack.getItemMeta();
+            if (meta != null) {
+                meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING, key);
+                item.setItemMeta(meta);
+            }
+        } else {
+            String material = boomerangConfig.getString("material");
+            if (material != null) {
+                item.setType(Material.getMaterial(material.toUpperCase()));
+            }
+            ItemMeta meta = item.getItemMeta();
+            if (meta != null) {
+                // Update item meta based on configuration
+                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', boomerangConfig.getString("name")));
+
+                List<String> lore = new ArrayList<>();
+                for (String loreLine : boomerangConfig.getStringList("lore")) {
+                    lore.add(ChatColor.translateAlternateColorCodes('&', loreLine));
+                }
+                meta.setLore(lore);
+
+                if (boomerangConfig.getBoolean("enchanted", false)) {
+                    meta.addEnchant(Enchantment.DURABILITY, 1, true); // Example enchantment
+                } else {
+                    meta.getEnchants().forEach((enchantment, level) -> meta.removeEnchant(enchantment));
+                }
+
+                if (boomerangConfig.contains("custom-model")) {
+                    meta.setCustomModelData(boomerangConfig.getInt("custom-model"));
+                }
+
+                meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING, key);
+                item.setItemMeta(meta);
+            }
+        }
+
+        return item; // Return the updated item
+    }
+
     private void playReceiveSound(Player player, ConfigurationSection soundSection) {
         if (soundSection != null && soundSection.getBoolean("enabled")) {
             String receiveSoundName = soundSection.getString("receive-sound");
@@ -345,6 +443,7 @@ public class throwListener implements Listener {
                         int count = 0;
                         while (existingItems.size() > count) {
                             ItemStack boomerang = existingItems.get(count);
+                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before adding it back
                             player.getInventory().addItem(boomerang);
                             existingItems.remove(count);
                             playReceiveSound(player, soundSection);
@@ -354,6 +453,7 @@ public class throwListener implements Listener {
                         int count = 0;
                         while (existingItems.size() > count) {
                             ItemStack boomerang = existingItems.get(count);
+                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before dropping it
                             player.getWorld().dropItemNaturally(player.getLocation(), boomerang);
                             playReceiveSound(player, soundSection);
                             existingItems.remove(count);
@@ -382,9 +482,7 @@ public class throwListener implements Listener {
                             LivingEntity livingentity = (LivingEntity) entity;
                             double damage = itemBuilder.boomerDamage.get(key);
                             livingentity.damage(damage, player);
-                            //UltraBoomerangs.plugin.getLogger().info("Tracking damage to: " + livingentity.getType().name() + " by player: " + player.getName());
                             damageTracker.computeIfAbsent(livingentity, k -> new ArrayList<>()).add(player);
-                            //UltraBoomerangs.plugin.getLogger().info("Updated damageTracker: " + damageTracker);
                         }
                     }
                 }
@@ -397,6 +495,7 @@ public class throwListener implements Listener {
                         int count = 0;
                         while (existingItems.size() > count) {
                             ItemStack boomerang = existingItems.get(count);
+                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before adding it back
                             player.getInventory().addItem(boomerang);
                             playReceiveSound(player, soundSection);
                             existingItems.remove(count);
@@ -406,6 +505,7 @@ public class throwListener implements Listener {
                         int count = 0;
                         while (existingItems.size() > count) {
                             ItemStack boomerang = existingItems.get(count);
+                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before dropping it
                             player.getWorld().dropItemNaturally(player.getLocation(), boomerang);
                             playReceiveSound(player, soundSection);
                             existingItems.remove(count);
@@ -425,87 +525,86 @@ public class throwListener implements Listener {
         }
     }
 
-
-
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-            //UltraBoomerangs.plugin.getLogger().info("onEntityDamageByEntity triggered");
-            if (event.getDamager() instanceof ArmorStand) {
-                ArmorStand as = (ArmorStand) event.getDamager();
-                Player player = getPlayerForArmorStand(as);
-                if (player != null && event.getEntity() instanceof LivingEntity && !(event.getEntity() instanceof ArmorStand)) {
-                    LivingEntity entity = (LivingEntity) event.getEntity();
-                    //UltraBoomerangs.plugin.getLogger().info("Damage dealt by: " + player.getName() + " to entity: " + entity.getType().name());
-                    damageTracker.computeIfAbsent(entity, k -> new ArrayList<>()).add(player);
-                    //UltraBoomerangs.plugin.getLogger().info("Updated damageTracker: " + damageTracker);
-                    double damage = itemBuilder.boomerDamage.get(getBoomerangKey(player));
+        if (event.getDamager() instanceof ArmorStand) {
+            ArmorStand as = (ArmorStand) event.getDamager();
+            Player player = getPlayerForArmorStand(as);
+            if (player != null && event.getEntity() instanceof LivingEntity && !(event.getEntity() instanceof ArmorStand)) {
+                LivingEntity entity = (LivingEntity) event.getEntity();
+                damageTracker.computeIfAbsent(entity, k -> new ArrayList<>()).add(player);
+                double damage = itemBuilder.boomerDamage.get(getBoomerangKey(player));
+                entity.damage(damage, player);
 
-                    entity.damage(damage, player);
-                    //UltraBoomerangs.plugin.getLogger().info("Setting boomerangDamage flag to true in onEntityDamageByEntity");
-
-                    if (isMcMMO) {
-                        // Add experience on damage
-                        String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
-                        int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
-                        String reason = (entity instanceof Player) ? "PVP" : "PVE";
-                        //UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDamageByEntity: " + skill);
-                        //UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
-                        McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
+                if (isMcMMO) {
+                    String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
+                    int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
+                    String reason = (entity instanceof Player) ? "PVP" : "PVE";
+                    McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
                 }
-                    if(isAuraSkills) {
-                        // Add experience on damage
-                        String auraSkill = config.getString("boomerangs." + getBoomerangKey(player) + ".auraskills_skill", "none");
-                        int auraXpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".auraskills_skill_amount", 0);
-                        //UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDamageByEntity: " + skill);
-                        //UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
-                        auraSkillsHelper.addAuraSkillsEXP(player, auraSkill, auraXpAmount);
-                    }
-
+                if (isAuraSkills) {
+                    String auraSkill = config.getString("boomerangs." + getBoomerangKey(player) + ".auraskills_skill", "none");
+                    int auraXpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".auraskills_skill_amount", 0);
+                    auraSkillsHelper.addAuraSkillsEXP(player, auraSkill, auraXpAmount);
                 }
             }
+        }
     }
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-            LivingEntity entity = event.getEntity();
-            //.plugin.getLogger().info("onEntityDeath triggered for entity: " + entity.getType().name());
-            //UltraBoomerangs.plugin.getLogger().info("Current damageTracker: " + damageTracker);
+        LivingEntity entity = event.getEntity();
+        boolean wasBoomerangDamage = damageTracker.containsKey(entity);
 
-            boolean wasBoomerangDamage = damageTracker.containsKey(entity);
-            //UltraBoomerangs.plugin.getLogger().info("Setting boomerangDamage flag in onEntityDeath: " + wasBoomerangDamage);
+        // Capture the drops before scheduling the task to avoid issues with cleared drops
+        List<ItemStack> drops = new ArrayList<>(event.getDrops());
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                List<Player> players = damageTracker.get(entity);
-                if (players != null && !players.isEmpty()) {
-                    Player player = players.get(players.size() - 1); // Get the last player who damaged the entity
-                     if(isMcMMO) {
-                        String skill = config.getString("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill", "none");
-                        int xpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".mcmmo_skill_amount", 0);
+        // Schedule the task to handle the drops and other logic
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            List<Player> players = damageTracker.get(entity);
+            if (players != null && !players.isEmpty()) {
+                Player player = players.get(players.size() - 1); // Get the last player who damaged the entity
+                String boomerangKey = getBoomerangKey(player);
+                if (boomerangKey != null) {
+                    ConfigurationSection boomerangConfig = config.getConfigurationSection("boomerangs." + boomerangKey);
+
+                    // Handle auto-pickup
+                    if (boomerangConfig.getBoolean("auto-pickup")) {
+                        for (ItemStack drop : drops) {
+                            if (drop != null && drop.getType() != Material.AIR) {
+                                player.getInventory().addItem(drop);
+                            }
+                        }
+                    }
+
+                    // Optionally, play a sound if configured
+                    if (boomerangConfig.getConfigurationSection("sounds").getBoolean("enabled", false)) {
+                        try {
+                            Sound receiveSound = Sound.valueOf(boomerangConfig.getString("sounds.receive-sound", "ENTITY_ITEM_PICKUP"));
+                            player.playSound(player.getLocation(), receiveSound,
+                                    (float) boomerangConfig.getDouble("sounds.volume", 1.0),
+                                    (float) boomerangConfig.getDouble("sounds.pitch", 1.0));
+                        } catch (IllegalArgumentException e) {
+                            UltraBoomerangs.plugin.getLogger().warning("Invalid sound name: " + boomerangConfig.getString("sounds.receive-sound"));
+                        }
+                    }
+
+                    if (isMcMMO) {
+                        String skill = boomerangConfig.getString("mcmmo_skill", "none");
+                        int xpAmount = boomerangConfig.getInt("mcmmo_skill_amount", 0);
                         String reason = (entity instanceof Player) ? "PVP" : "PVE";
-                         //plugin.getLogger().info("Giving skill xp, skill:" + skill + " xp: " + xpAmount);
-                         //UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDeath: " + skill);
-                         //UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
                         McMMOHelper.addMcMMOExperience(player, skill, xpAmount, reason);
                     }
-                    if(isAuraSkills) {
-                        // Add experience on damage
-                        String auraSkill = config.getString("boomerangs." + getBoomerangKey(player) + ".auraskills_skill", "none");
-                        int auraXpAmount = config.getInt("boomerangs." + getBoomerangKey(player) + ".auraskills_skill_amount", 0);
-                        //UltraBoomerangs.plugin.getLogger().info("Passing skill in onEntityDamageByEntity: " + skill);
-                        //UltraBoomerangs.plugin.getLogger().info("XP Amount: " + xpAmount + ", Reason: " + reason);
+                    if (isAuraSkills) {
+                        String auraSkill = boomerangConfig.getString("auraskills_skill", "none");
+                        int auraXpAmount = boomerangConfig.getInt("auraskills_skill_amount", 0);
                         auraSkillsHelper.addAuraSkillsEXP(player, auraSkill, auraXpAmount);
                     }
-
-                } else {
-                    //UltraBoomerangs.plugin.getLogger().info("Player is null in onEntityDeath");
                 }
+            }
+        }, 1L); // 1 tick delay
 
-                // Reset the flag after processing the death event
-                //UltraBoomerangs.plugin.getLogger().info("Resetting boomerangDamage flag in onEntityDeath");
-            }, 1L); // 1 tick delay
-        }
+        // Clear the drops after capturing them
+        event.getDrops().clear();
     }
-
-
-
-
+}

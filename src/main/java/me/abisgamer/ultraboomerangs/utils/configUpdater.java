@@ -52,6 +52,11 @@ public class configUpdater {
                     currentSection.set("auraskills_skill_amount", "10");
                     UltraBoomerangs.plugin.getLogger().info("Updated config to add auraskills_skill_amount section");
                 }
+                if (!currentSection.getKeys(false).contains("auto-pickup")) {
+                    currentSection.createSection("auto-pickup");
+                    currentSection.set("auto-pickup", "false");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add auto-pickup section");
+                }
 
             }
         }
