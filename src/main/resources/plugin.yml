@@ -1,9 +1,9 @@
 name: UltraBoomerangs
 version: '${project.version}'
 main: me.abisgamer.ultraboomerangs.UltraBoomerangs
-api-version: 1.16
+api-version: 1.17
 authors: [ AbisGamer ]
-softdepend: [mcMMO]
+softdepend: [mcMMO, AuraSkills]
 description: Customizable Boomerangs Plugin
 commands:
   ultraboomerangs:

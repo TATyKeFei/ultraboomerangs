@@ -6,14 +6,14 @@
 
     <groupId>me.abisgamer</groupId>
     <artifactId>UltraBoomerangs</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <name>UltraBoomerangs</name>
 
     <description>Customizable Boomerangs Plugin</description>
     <properties>
-        <java.version>16</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -40,206 +40,6 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <filters>
-                                <filter>
-                                    <artifact>commons-lang:commons-lang</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.google.guava:guava</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.google.code.gson:gson</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.yaml:snakeyaml</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.jetbrains:annotations</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.gmail.nossr50.mcMMO:mcMMO</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.maven.scm:maven-scm-provider-gitexe</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>commons-io:commons-io</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.maven.scm:maven-scm-provider-git-commons</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.maven.scm:maven-scm-api</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.codehaus.plexus:plexus-utils</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q.worldguard:worldguard-core</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q.worldguard.worldguard-libs:core</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q.worldedit:worldedit-core</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q.worldedit.worldedit-libs:core</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.antlr:antlr4</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.antlr:antlr-runtime</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.antlr:ST4</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.abego.treelayout:org.abego.treelayout.core</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.glassfish:javax.json</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.ibm.icu:icu4j</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.mozilla:rhino-runtime</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.logging.log4j:log4j-api</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>it.unimi.dsi:fastutil</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.antlr:antlr4-runtime</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.flywaydb:flyway-core</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q.worldguard:worldguard-legacy</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q.worldedit:worldedit-bukkit</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q.worldedit.worldedit-libs:bukkit</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.apache.logging.log4j:log4j-slf4j-impl</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.slf4j:slf4j-api</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>com.sk89q:commandbook</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <artifact>org.bstats:bstats-bukkit</artifact>
-                                    <excludes>
-                                        <exclude>**/*</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>
@@ -275,13 +75,17 @@
             <id>neetgames</id>
             <url>https://nexus.neetgames.com/repository/maven-releases/</url>
         </repository>
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.16.5-R0.1-SNAPSHOT</version>
+            <version>1.17.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -290,9 +94,16 @@
             <version>16.0.1</version>
         </dependency>
         <dependency>
+            <groupId>dev.aurelium</groupId>
+            <artifactId>auraskills-api-bukkit</artifactId>
+            <version>2.1.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.gmail.nossr50.mcMMO</groupId>
             <artifactId>mcMMO</artifactId>
             <version>2.2.004</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

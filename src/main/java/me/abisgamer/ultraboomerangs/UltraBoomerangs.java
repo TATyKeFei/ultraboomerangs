@@ -3,18 +3,18 @@ package me.abisgamer.ultraboomerangs;
 import me.abisgamer.ultraboomerangs.commands.mainCommand;
 import me.abisgamer.ultraboomerangs.listeners.mcMMOListener;
 import me.abisgamer.ultraboomerangs.listeners.throwListener;
+import me.abisgamer.ultraboomerangs.listeners.auraSkillsListener;
 import me.abisgamer.ultraboomerangs.utils.configUpdater;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
+import org.bukkit.plugin.EventExecutor;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public final class UltraBoomerangs extends JavaPlugin {
 
@@ -22,6 +22,7 @@ public final class UltraBoomerangs extends JavaPlugin {
     public FileConfiguration messages;
 
     public static boolean isMcMMO = false;
+    public static boolean isAuraSkills = false;
 
     @Override
     public void onEnable() {
@@ -38,14 +39,34 @@ public final class UltraBoomerangs extends JavaPlugin {
         itemBuilder.createBoomerangs();
         this.getCommand("ultraboomerangs").setExecutor(new mainCommand());
 
-        // Register listeners with priority from the config
+        // Set plugin presence flags
         if (getServer().getPluginManager().getPlugin("mcMMO") != null) {
             plugin.getLogger().info("mcMMO detected, Enabled support for mcMMO.");
-            getServer().getPluginManager().registerEvents(new mcMMOListener(), this); // Register the new mcMMO experience listener
             isMcMMO = true;
         }
-        registerListenersWithPriority();
 
+        if (getServer().getPluginManager().getPlugin("AuraSkills") != null) {
+            plugin.getLogger().info("AuraSkills detected, Enabled support for AuraSkills.");
+            isAuraSkills = true;
+        }
+
+        // Create throwListener with correct flags
+        throwListener listener = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO, isAuraSkills);
+
+        // Register listeners with priority from the config
+        registerListenersWithPriority(listener);
+
+        // Register mcMMOListener if mcMMO is present
+        if (isMcMMO) {
+            getServer().getPluginManager().registerEvents(new mcMMOListener(this, listener), this);
+        }
+
+        // Register auraSkillsListener if AuraSkills is present
+        if (isAuraSkills) {
+            getServer().getPluginManager().registerEvents(new auraSkillsListener(this, listener), this);
+        }
+
+        // Load messages file
         File f = new File(getDataFolder() + File.separator + "messages.yml");
         if (!f.exists()) {
             createMessagesFile();
@@ -54,7 +75,7 @@ public final class UltraBoomerangs extends JavaPlugin {
         messages = fmessages;
     }
 
-    private void registerListenersWithPriority() {
+    private void registerListenersWithPriority(throwListener listener) {
         String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
         EventPriority priority;
         try {
@@ -64,9 +85,34 @@ public final class UltraBoomerangs extends JavaPlugin {
             priority = EventPriority.NORMAL;
         }
 
-        throwListener listener = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO);
+        PluginManager pluginManager = getServer().getPluginManager();
+        EventExecutor executor = (listener1, event) -> {
+            if (event instanceof org.bukkit.event.player.PlayerInteractEvent) {
+                listener.onInteract((org.bukkit.event.player.PlayerInteractEvent) event);
+            }
+            if (event instanceof org.bukkit.event.player.PlayerDropItemEvent) {
+                listener.onPlayerDropItem((org.bukkit.event.player.PlayerDropItemEvent) event);
+            }
+            if (event instanceof org.bukkit.event.player.PlayerQuitEvent) {
+                listener.onPlayerQuit((org.bukkit.event.player.PlayerQuitEvent) event);
+            }
+            if (event instanceof org.bukkit.event.server.PluginDisableEvent) {
+                listener.onPluginDisable((org.bukkit.event.server.PluginDisableEvent) event);
+            }
+            if (event instanceof org.bukkit.event.entity.EntityDamageByEntityEvent) {
+                listener.onEntityDamageByEntity((org.bukkit.event.entity.EntityDamageByEntityEvent) event);
+            }
+            if (event instanceof org.bukkit.event.entity.EntityDeathEvent) {
+                listener.onEntityDeath((org.bukkit.event.entity.EntityDeathEvent) event);
+            }
+        };
 
-        getServer().getPluginManager().registerEvents(listener, this);
+        pluginManager.registerEvent(org.bukkit.event.player.PlayerInteractEvent.class, listener, priority, executor, this);
+        pluginManager.registerEvent(org.bukkit.event.player.PlayerDropItemEvent.class, listener, priority, executor, this);
+        pluginManager.registerEvent(org.bukkit.event.player.PlayerQuitEvent.class, listener, priority, executor, this);
+        pluginManager.registerEvent(org.bukkit.event.server.PluginDisableEvent.class, listener, priority, executor, this);
+        pluginManager.registerEvent(org.bukkit.event.entity.EntityDamageByEntityEvent.class, listener, priority, executor, this);
+        pluginManager.registerEvent(org.bukkit.event.entity.EntityDeathEvent.class, listener, priority, executor, this);
     }
 
     @Override

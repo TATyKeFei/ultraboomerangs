@@ -42,6 +42,16 @@ public class configUpdater {
                     currentSection.set("mcmmo_skill_amount", "0");
                     UltraBoomerangs.plugin.getLogger().info("Updated config to add mcmmo_skill_amount section");
                 }
+                if (!currentSection.getKeys(false).contains("auraskills_skill")) {
+                    currentSection.createSection("auraskills_skill");
+                    currentSection.set("auraskills_skill", "Archery");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add auraskills_skill section");
+                }
+                if (!currentSection.getKeys(false).contains("auraskills_skill_amount")) {
+                    currentSection.createSection("auraskills_skill_amount");
+                    currentSection.set("auraskills_skill_amount", "10");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add auraskills_skill_amount section");
+                }
 
             }
         }
