@@ -85,7 +85,7 @@ public class throwListener implements Listener {
                 ItemStack boomerang = itemBuilder.boomerangs.get(key);
                 if (action == clickType || action == secondClickType) {
                     ItemStack itemInHand = player.getInventory().getItemInMainHand();
-                    if (isBoomerang(itemInHand, boomerang, key)) {
+                    if (isBoomerang(itemInHand, key)) {
                         // Check cooldown before removing the item
                         Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
                         if (cooldowns.containsKey(key)) {
@@ -106,7 +106,7 @@ public class throwListener implements Listener {
                         }
                         player.updateInventory(); // Ensure the inventory is updated
 
-                        handleBoomerangThrow(player, updateItemMeta(itemInHand.clone(), key), key); // Pass the updated item
+                        handleBoomerangThrow(player, key); // Pass the updated item
                         event.setCancelled(true);
                     }
                 }
@@ -127,9 +127,8 @@ public class throwListener implements Listener {
                 if (!Objects.equals(ConfigClickType, "drop")) {
                     continue;
                 }
-                ItemStack boomerang = itemBuilder.boomerangs.get(key);
                 ItemStack itemDrop = event.getItemDrop().getItemStack();
-                if (isBoomerang(itemDrop, boomerang, key)) {
+                if (isBoomerang(itemDrop, key)) {
                     // Check cooldown before removing the item
                     Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
                     if (cooldowns.containsKey(key)) {
@@ -151,7 +150,7 @@ public class throwListener implements Listener {
                     }
                     player.updateInventory(); // Ensure the inventory is updated
 
-                    handleBoomerangThrow(player, updateItemMeta(itemInHand.clone(), key), key); // Pass the updated item
+                    handleBoomerangThrow(player, key); // Pass the updated item
                     event.setCancelled(true);
                     break;
                 }
@@ -177,7 +176,7 @@ public class throwListener implements Listener {
         return null;
     }
 
-    private void handleBoomerangThrow(Player player, ItemStack itemInHand, String key) {
+    private void handleBoomerangThrow(Player player, String key) {
         FileConfiguration messages = plugin.messages;
         Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
         if (cooldowns.containsKey(key)) {
@@ -200,9 +199,10 @@ public class throwListener implements Listener {
             }
         }
 
-        plugin.getLogger().info("Before updating thrown boomerang: " + itemInHand);
-        ItemStack thrownBoomerang = updateItemMeta(itemInHand.clone(), key); // Clone and update the item
-        plugin.getLogger().info("After updating thrown boomerang: " + thrownBoomerang);
+        ItemStack thrownBoomerang = itemBuilder.boomerangs.get(key).clone(); // Get the item directly from the config
+        //plugin.getLogger().info("Before updating thrown boomerang: " + thrownBoomerang);
+        //thrownBoomerang = updateItemMeta(thrownBoomerang, key); // Ensure the cloned item is updated
+        //plugin.getLogger().info("After updating thrown boomerang: " + thrownBoomerang);
 
         ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(player.getEyeLocation().subtract(0, 0.5, 0), EntityType.ARMOR_STAND);
         as.setVisible(false);
@@ -226,8 +226,8 @@ public class throwListener implements Listener {
         new BoomerangReturnTask(player, as, key, finalExistingItems, soundSection).runTaskTimer(plugin, 1L, 1L);
     }
 
-    private boolean isBoomerang(ItemStack item, ItemStack boomerang, String key) {
-        if (item == null || boomerang == null) {
+    private boolean isBoomerang(ItemStack item, String key) {
+        if (item == null) {
             return false;
         }
 
@@ -241,6 +241,7 @@ public class throwListener implements Listener {
         }
 
         if (updateOldBoomerangs) {
+            ItemStack boomerang = itemBuilder.boomerangs.get(key);
             if (item.isSimilar(boomerang)) {
                 meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING, key);
                 item.setItemMeta(meta);
@@ -439,26 +440,14 @@ public class throwListener implements Listener {
                 as.teleport(as.getLocation().subtract(vector.normalize()));
                 if (i >= distance * 2) {
                     as.remove();
+                    ItemStack latestBoomerang = itemBuilder.boomerangs.get(key).clone();
+                    //latestBoomerang = updateItemMeta(latestBoomerang, key); // Get the latest boomerang from config
                     if (player.getInventory().firstEmpty() != -1) {
-                        int count = 0;
-                        while (existingItems.size() > count) {
-                            ItemStack boomerang = existingItems.get(count);
-                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before adding it back
-                            player.getInventory().addItem(boomerang);
-                            existingItems.remove(count);
-                            playReceiveSound(player, soundSection);
-                            count++;
-                        }
+                        player.getInventory().addItem(latestBoomerang);
+                        playReceiveSound(player, soundSection);
                     } else {
-                        int count = 0;
-                        while (existingItems.size() > count) {
-                            ItemStack boomerang = existingItems.get(count);
-                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before dropping it
-                            player.getWorld().dropItemNaturally(player.getLocation(), boomerang);
-                            playReceiveSound(player, soundSection);
-                            existingItems.remove(count);
-                            count++;
-                        }
+                        player.getWorld().dropItemNaturally(player.getLocation(), latestBoomerang);
+                        playReceiveSound(player, soundSection);
                     }
 
                     // Remove the player from playerBoomer when boomerang returns
@@ -491,26 +480,14 @@ public class throwListener implements Listener {
             if (as.getTargetBlockExact(1) != null && !as.getTargetBlockExact(1).isPassable()) {
                 if (!as.isDead()) {
                     as.remove();
+                    ItemStack latestBoomerang = itemBuilder.boomerangs.get(key).clone();
+                    latestBoomerang = updateItemMeta(latestBoomerang, key); // Get the latest boomerang from config
                     if (player.getInventory().firstEmpty() != -1) {
-                        int count = 0;
-                        while (existingItems.size() > count) {
-                            ItemStack boomerang = existingItems.get(count);
-                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before adding it back
-                            player.getInventory().addItem(boomerang);
-                            playReceiveSound(player, soundSection);
-                            existingItems.remove(count);
-                            count++;
-                        }
+                        player.getInventory().addItem(latestBoomerang);
+                        playReceiveSound(player, soundSection);
                     } else {
-                        int count = 0;
-                        while (existingItems.size() > count) {
-                            ItemStack boomerang = existingItems.get(count);
-                            boomerang = updateItemMeta(boomerang, key); // Ensure boomerang meta is updated before dropping it
-                            player.getWorld().dropItemNaturally(player.getLocation(), boomerang);
-                            playReceiveSound(player, soundSection);
-                            existingItems.remove(count);
-                            count++;
-                        }
+                        player.getWorld().dropItemNaturally(player.getLocation(), latestBoomerang);
+                        playReceiveSound(player, soundSection);
                     }
 
                     // Remove the player from playerBoomer when boomerang returns
