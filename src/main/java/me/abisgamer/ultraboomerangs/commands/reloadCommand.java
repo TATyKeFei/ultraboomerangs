@@ -14,18 +14,23 @@ public class reloadCommand implements CommandExecutor {
         FileConfiguration messages = UltraBoomerangs.plugin.messages;
 
         if (cmd.getName().equalsIgnoreCase("ultraboomerangs")) {
-            UltraBoomerangs.plugin.reloadConfig();
-            UltraBoomerangs.plugin.reloadCustomConfig();
-            itemBuilder.createBoomerangs();  // Reinitialize itemBuilder to update boomerangs map
-            UltraBoomerangs.plugin.registerAllUpdateListeners(); // Re-register listeners after reload
-
 
             if (sender instanceof Player) {
                 Player player = (Player) sender;
                 if (player.hasPermission("ultraboomerangs.reload")) {
+                    UltraBoomerangs.plugin.reloadConfig();
+                    UltraBoomerangs.plugin.reloadCustomConfig();
+                    itemBuilder.createBoomerangs();  // Reinitialize itemBuilder to update boomerangs map
+                    UltraBoomerangs.plugin.registerAllUpdateListeners(); // Re-register listeners after reload
                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("prefix") + messages.getString("reload")));
                 }
             } else {
+                UltraBoomerangs.plugin.reloadConfig();
+                UltraBoomerangs.plugin.reloadCustomConfig();
+                itemBuilder.createBoomerangs();  // Reinitialize itemBuilder to update boomerangs map
+                UltraBoomerangs.plugin.registerAllUpdateListeners(); // Re-register listeners after reload
+
+
                 UltraBoomerangs.plugin.getLogger().info("Plugin reloaded successfully");
             }
             return true;

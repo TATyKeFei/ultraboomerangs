@@ -12,36 +12,58 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-
 public class makeCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         FileConfiguration messages = UltraBoomerangs.plugin.messages;
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
-            if (cmd.getName().equalsIgnoreCase("ultraboomerangs")) {
-                if (player.hasPermission("ultraboomerangs.make")) {
-                    if (args.length == 2) {
-                        if (player.getInventory().getItemInMainHand().getType() != Material.AIR) {
+
+        if (cmd.getName().equalsIgnoreCase("ultraboomerangs")) {
+            if (args.length == 1) {
+                String boomerangId = args[0];
+
+                if (sender instanceof Player) {
+                    Player player = (Player) sender;
+
+                    if (player.hasPermission("ultraboomerangs.make")) {
+                        ItemStack boomerang = player.getInventory().getItemInMainHand();
+                        if (boomerang.getType() != Material.AIR) {
                             ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
-                            ConfigurationSection boomerangSection = config.getConfigurationSection("boomerangs");
-                            ItemStack boomerang = player.getInventory().getItemInMainHand();
-                            boomerangSection.set(args[1] + ".itemstack", boomerang);
-                            boomerangSection.set(args[1] + ".is-itemstack", true);
-                            boomerangSection.set(args[1] + ".damage", 50);
-                            boomerangSection.set(args[1] + ".travel-distance", 10);
+                            ConfigurationSection boomerangSection = config.createSection("boomerangs." + boomerangId);
+                            boomerangSection.set("itemstack", boomerang);
+                            boomerangSection.set("is-itemstack", true);
+                            boomerangSection.set("damage", 50);
+                            boomerangSection.set("travel-distance", 10);
+                            boomerangSection.set("click-type", "right");
+                            boomerangSection.set("cooldown", 3);
+                            boomerangSection.set("mcmmo_skill", "Archery");
+                            boomerangSection.set("mcmmo_skill_amount", 10);
+                            boomerangSection.set("auraskills_skill", "Archery");
+                            boomerangSection.set("auraskills_skill_amount", 10);
+                            boomerangSection.set("auto-pickup", true);
+
+                            ConfigurationSection soundsSection = boomerangSection.createSection("sounds");
+                            soundsSection.set("enabled", true);
+                            soundsSection.set("throw-sound", "ENTITY_ENDER_DRAGON_FLAP");
+                            soundsSection.set("receive-sound", "ENTITY_ITEM_PICKUP");
+                            soundsSection.set("volume", 1.0);
+                            soundsSection.set("pitch", 1.0);
+
                             UltraBoomerangs.plugin.saveConfig();
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&',messages.getString("prefix") + messages.getString("make-success") + args[1]));
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("prefix") + messages.getString("make-success") + boomerangId));
                             itemBuilder.createBoomerangs();
+                        } else {
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("prefix") + ChatColor.RED + "You must be holding an item to make a boomerang."));
                         }
                     } else {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&',messages.getString("prefix") + messages.getString("id-error")));
-                        return false;
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("prefix") + ChatColor.RED + "You do not have permission to use this command."));
                     }
+                } else {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("prefix") + ChatColor.RED + "This command can only be executed by a player."));
                 }
+            } else {
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("prefix") + messages.getString("id-error")));
+                return false;
             }
-        } else {
-            UltraBoomerangs.plugin.getLogger().info("This command can only be executed by a player");
         }
-        return false;
+        return true;
     }
 }

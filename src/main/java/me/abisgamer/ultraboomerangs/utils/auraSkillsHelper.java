@@ -12,7 +12,7 @@ public class auraSkillsHelper {
 
         AuraSkillsApi auraSkills = AuraSkillsApi.get();
         SkillsUser user = auraSkills.getUser(player.getUniqueId());
-        UltraBoomerangs.plugin.getLogger().info("Got to add exp");
+        //UltraBoomerangs.plugin.getLogger().info("Got to add exp");
 
         if ("none".equalsIgnoreCase(skill) || player == null || skill == null || xpAmount <= 0) {
             return; // Do nothing if the skill is set to "none" or parameters are invalid
@@ -21,7 +21,7 @@ public class auraSkillsHelper {
         try {
             Skills skillEnum = Skills.valueOf(skill.toUpperCase()); // Convert the skill string to enum
             user.addSkillXp(skillEnum, xpAmount); // Add XP to the specified skill
-            UltraBoomerangs.plugin.getLogger().info("Added XP");
+            //UltraBoomerangs.plugin.getLogger().info("Added XP");
         } catch (IllegalArgumentException e) {
             // Handle the case where the skill string does not match any enum constant
             UltraBoomerangs.plugin.getLogger().info("Invalid skill name: " + skill);

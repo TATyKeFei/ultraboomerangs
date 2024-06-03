@@ -20,6 +20,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -73,16 +74,30 @@ public class throwListener implements Listener {
                 String ConfigClickType = itemBuilder.clickType.get(key);
                 Action clickType;
                 Action secondClickType;
+                boolean requiresSneaking = false;
+
                 if (Objects.equals(ConfigClickType, "right")) {
                     clickType = Action.RIGHT_CLICK_AIR;
                     secondClickType = Action.RIGHT_CLICK_BLOCK;
                 } else if (Objects.equals(ConfigClickType, "left")) {
                     clickType = Action.LEFT_CLICK_AIR;
                     secondClickType = Action.LEFT_CLICK_BLOCK;
+                } else if (Objects.equals(ConfigClickType, "shift-right")) {
+                    clickType = Action.RIGHT_CLICK_AIR;
+                    secondClickType = Action.RIGHT_CLICK_BLOCK;
+                    requiresSneaking = true;
+                } else if (Objects.equals(ConfigClickType, "shift-left")) {
+                    clickType = Action.LEFT_CLICK_AIR;
+                    secondClickType = Action.LEFT_CLICK_BLOCK;
+                    requiresSneaking = true;
                 } else {
                     continue;
                 }
-                ItemStack boomerang = itemBuilder.boomerangs.get(key);
+
+                if (requiresSneaking && !player.isSneaking()) {
+                    continue;
+                }
+
                 if (action == clickType || action == secondClickType) {
                     ItemStack itemInHand = player.getInventory().getItemInMainHand();
                     if (isBoomerang(itemInHand, key)) {
@@ -545,8 +560,8 @@ public class throwListener implements Listener {
                 if (boomerangKey != null) {
                     ConfigurationSection boomerangConfig = config.getConfigurationSection("boomerangs." + boomerangKey);
 
-                    // Handle auto-pickup
-                    if (boomerangConfig.getBoolean("auto-pickup")) {
+                    // Handle auto-pickup for non-player entities
+                    if (!(entity instanceof Player) && boomerangConfig.getBoolean("auto-pickup")) {
                         for (ItemStack drop : drops) {
                             if (drop != null && drop.getType() != Material.AIR) {
                                 player.getInventory().addItem(drop);
@@ -581,7 +596,10 @@ public class throwListener implements Listener {
             }
         }, 1L); // 1 tick delay
 
-        // Clear the drops after capturing them
-        event.getDrops().clear();
+        // Clear the drops only for non-player entities
+        if (!(entity instanceof Player)) {
+            event.getDrops().clear();
+        }
     }
+
 }

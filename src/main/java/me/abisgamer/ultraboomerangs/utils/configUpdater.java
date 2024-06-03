@@ -57,6 +57,11 @@ public class configUpdater {
                     currentSection.set("auto-pickup", "false");
                     UltraBoomerangs.plugin.getLogger().info("Updated config to add auto-pickup section");
                 }
+                if (!currentSection.getKeys(false).contains("click-type")) {
+                    currentSection.createSection("click-type");
+                    currentSection.set("click-type", "right");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add click-type section");
+                }
 
             }
         }

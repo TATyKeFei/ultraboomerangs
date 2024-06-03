@@ -26,7 +26,7 @@ boomerangs:
     custom-model: 1022 #Custom model data
     enchanted: true #Make the boomerang enchanted giving it the glowing effect
     travel-distance: 5 #How far the boomerang should travel when thrown
-    click-type: "drop" #Possible types: right, left, drop
+    click-type: "right" #Possible types: right, left, drop, shift-left or shift-right
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
     mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
     mcmmo_skill_amount: 10 #the amount of xp to give
@@ -52,7 +52,7 @@ boomerangs:
     custom-model: 1024
     enchanted: false
     travel-distance: 10
-    click-type: "right" #Possible types: right, left, drop
+    click-type: "right" #Possible types: right, left, drop, shift-left or shift-right
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
     mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
     mcmmo_skill_amount: 10 #the amount of xp to give
@@ -78,7 +78,7 @@ boomerangs:
     custom-model: 1026
     enchanted: true
     travel-distance: 15
-    click-type: "left" #Possible types: right, left, drop
+    click-type: "left" #Possible types: right, left, drop, shift-left or shift-right
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
     mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
     mcmmo_skill_amount: 10 #the amount of xp to give
@@ -101,7 +101,7 @@ boomerangs:
     enchanted: true
     damage: 50
     travel-distance: 10
-    click-type: "left" #Possible types: right, left, drop
+    click-type: "left" #Possible types: right, left, drop, shift-left or shift-right
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
     mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
     mcmmo_skill_amount: 10 #the amount of xp to give
@@ -124,7 +124,7 @@ boomerangs:
     is-itemstack: true
     damage: 50
     travel-distance: 10
-    click-type: "drop" #Possible types: right, left, drop
+    click-type: "drop" #Possible types: right, left, drop, shift-left or shift-right
     cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
     mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
     mcmmo_skill_amount: 10 #the amount of xp to give
