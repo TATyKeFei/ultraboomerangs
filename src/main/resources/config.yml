@@ -95,7 +95,7 @@ boomerangs:
   stoney:
     itemstack:
       ==: org.bukkit.inventory.ItemStack
-      v: 3578
+      v: 2230
       type: STONE_SWORD
     is-itemstack: true
     enchanted: true
@@ -119,7 +119,7 @@ boomerangs:
   dropper:
     itemstack:
       ==: org.bukkit.inventory.ItemStack
-      v: 3578
+      v: 2230
       type: DROPPER
     is-itemstack: true
     damage: 50
