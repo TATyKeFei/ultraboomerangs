@@ -6,7 +6,7 @@
 
     <groupId>me.abisgamer</groupId>
     <artifactId>UltraBoomerangs</artifactId>
-    <version>1.0.9-Hotfix</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <name>UltraBoomerangs</name>
@@ -45,14 +45,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <outputDirectory>D:\Premium Projects\Test Server\plugins</outputDirectory>
-                </configuration>
-            </plugin>
         </plugins>
         <resources>
             <resource>
