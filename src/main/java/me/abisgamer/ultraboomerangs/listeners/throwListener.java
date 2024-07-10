@@ -457,10 +457,16 @@ public class throwListener implements Listener {
                     as.remove();
                     ItemStack latestBoomerang = itemBuilder.boomerangs.get(key).clone();
                     //latestBoomerang = updateItemMeta(latestBoomerang, key); // Get the latest boomerang from config
-                    if (player.getInventory().firstEmpty() != -1) {
-                        player.getInventory().addItem(latestBoomerang);
+
+                    // Get the player's selected slot
+                    int selectedSlot = player.getInventory().getHeldItemSlot();
+
+                    // If the selected slot is empty, add the boomerang to it
+                    if (player.getInventory().getItem(selectedSlot) == null) {
+                        player.getInventory().setItem(selectedSlot, latestBoomerang);
                         playReceiveSound(player, soundSection);
                     } else {
+                        // If the selected slot is not empty, drop the boomerang at the player's location
                         player.getWorld().dropItemNaturally(player.getLocation(), latestBoomerang);
                         playReceiveSound(player, soundSection);
                     }
