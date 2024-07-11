@@ -37,6 +37,7 @@ boomerangs:
       x_rotation: 0
       y_rotation: 20 #Boomerang type rotation
       z_rotation: 0
+    rotation_type: "curved" #curved or normal depending on your choice
 
   boomerang_2:
     is-itemstack: false
@@ -67,6 +68,7 @@ boomerangs:
       x_rotation: 5 #Straight rotation for axe
       y_rotation: 0
       z_rotation: 0
+    rotation_type: "normal" #curved or normal depending on your choice
 
   boomerang_3:
     is-itemstack: false
@@ -97,6 +99,7 @@ boomerangs:
       x_rotation: 5
       y_rotation: 0
       z_rotation: 0
+    rotation_type: "normal" #curved or normal depending on your choice
 
   stoney:
     itemstack:
@@ -124,6 +127,7 @@ boomerangs:
       x_rotation: 5
       y_rotation: 0
       z_rotation: 0
+    rotation_type: "normal" #curved or normal depending on your choice
 
   # This one gets thrown when you drop it, get it, dropper, haha? no funny? okay
   dropper:
@@ -151,3 +155,4 @@ boomerangs:
       x_rotation: 0
       y_rotation: 20
       z_rotation: 0
+    rotation_type: "curved" #curved or normal depending on your choice

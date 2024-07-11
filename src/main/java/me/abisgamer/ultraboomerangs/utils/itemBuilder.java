@@ -25,6 +25,7 @@ public class itemBuilder {
     public static HashMap<String, Integer> boomerang_armorstand_x = new HashMap<>();
     public static HashMap<String, Integer> boomerang_armorstand_y = new HashMap<>();
     public static HashMap<String, Integer> boomerang_armorstand_z = new HashMap<>();
+    public static HashMap<String, String> rotationType = new HashMap<>();
 
 
     public static void createBoomerangs() {
@@ -52,6 +53,7 @@ public class itemBuilder {
                 int boomerang_armorstand_x_value = config.getInt("boomerangs." + key + ".armorstand_arm.x_rotation", 0);
                 int boomerang_armorstand_y_value = config.getInt("boomerangs." + key + ".armorstand_arm.y_rotation", 0);
                 int boomerang_armorstand_z_value = config.getInt("boomerangs." + key + ".armorstand_arm.z_rotation", 0);
+                String rotationTypeValue = config.getString("boomerangs." + key + ".rotation_type", "curved");
 
 
                 ItemStack boomerang;
@@ -90,6 +92,7 @@ public class itemBuilder {
                 boomerang_armorstand_x.put(key, boomerang_armorstand_x_value);
                 boomerang_armorstand_y.put(key, boomerang_armorstand_y_value);
                 boomerang_armorstand_z.put(key, boomerang_armorstand_z_value);
+                rotationType.put(key, rotationTypeValue);
 
 
                 UltraBoomerangs.plugin.getLogger().info("Loaded Boomerang: " + key);

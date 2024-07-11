@@ -442,7 +442,7 @@ public class throwListener implements Listener {
             this.key = key;
             this.existingItems = existingItems;
             this.soundSection = soundSection;
-            this.vector = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(10)).subtract(player.getEyeLocation().subtract(0, 0.5, 0)).toVector();
+            this.vector = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(-10)).subtract(player.getEyeLocation().subtract(0, 0.5, 0)).toVector();
             this.distance = itemBuilder.travelDistance.get(key);
         }
 
@@ -451,9 +451,20 @@ public class throwListener implements Listener {
             EulerAngle rot = as.getRightArmPose();
             EulerAngle rotnew = rot.add(itemBuilder.boomerang_armorstand_x.get(key), itemBuilder.boomerang_armorstand_y.get(key), itemBuilder.boomerang_armorstand_z.get(key));
             as.setRightArmPose(rotnew);
-
+            String rotationType = itemBuilder.rotationType.get(key);
+            // Calculate the angle for the semi-circle path if the rotation type is "curved"
+            double angle = rotationType.equals("curved") ? Math.toRadians(i * 180.0 / distance) : 0;
+            // Create a new vector based on the rotation type
+            Vector newVector;
+            if (rotationType.equals("curved")) {
+                // Rotate the initial direction to the left
+                Vector initialDirection = player.getEyeLocation().getDirection().rotateAroundY(Math.toRadians(-110));
+                newVector = new Vector(initialDirection.getX() * Math.cos(angle) - initialDirection.getZ() * Math.sin(angle), 0, initialDirection.getX() * Math.sin(angle) + initialDirection.getZ() * Math.cos(angle)); // Set the y component to 0 to keep the boomerang on the same y-axis
+            } else {
+                newVector = vector;
+            }
             if (i >= distance) {
-                as.teleport(as.getLocation().subtract(vector.normalize()));
+                as.teleport(as.getLocation().subtract(newVector.normalize()));
                 if (i >= distance * 2) {
                     as.remove();
                     ItemStack latestBoomerang = itemBuilder.boomerangs.get(key).clone();
@@ -481,7 +492,7 @@ public class throwListener implements Listener {
                     cancel();
                 }
             } else {
-                as.teleport(as.getLocation().add(vector.normalize()));
+                as.teleport(as.getLocation().subtract(newVector.normalize()));
             }
 
             i++;
@@ -501,32 +512,34 @@ public class throwListener implements Listener {
 
             if (as.getTargetBlockExact(1) != null && !as.getTargetBlockExact(1).isPassable()) {
                 if (!as.isDead()) {
-                    as.remove();
-                    ItemStack latestBoomerang = itemBuilder.boomerangs.get(key).clone();
-                    //latestBoomerang = updateItemMeta(latestBoomerang, key); // Get the latest boomerang from config
+                    // Change the direction of the boomerang when it hits a block
+                    newVector = newVector.multiply(-1);
+                }
+            } else if (i >= distance * 2) {
+                as.remove();
+                ItemStack latestBoomerang = itemBuilder.boomerangs.get(key).clone();
+                //latestBoomerang = updateItemMeta(latestBoomerang, key); // Get the latest boomerang from config
 
-                    // Get the player's selected slot
-                    int selectedSlot = player.getInventory().getHeldItemSlot();
+                // Get the player's selected slot
+                int selectedSlot = player.getInventory().getHeldItemSlot();
 
-                    // If the selected slot is empty, add the boomerang to it
-                    if (player.getInventory().getItem(selectedSlot) == null) {
-                        player.getInventory().setItem(selectedSlot, latestBoomerang);
-                        playReceiveSound(player, soundSection);
-                    } else {
-                        // If the selected slot is not empty, drop the boomerang at the player's location
-                        player.getWorld().dropItemNaturally(player.getLocation(), latestBoomerang);
-                        playReceiveSound(player, soundSection);
-                    }
-
-                    // Remove the player from playerBoomer when boomerang returns
-                    playerBoomer.get(player).remove(key);
-                    if (playerBoomer.get(player).isEmpty()) {
-                        playerBoomer.remove(player);
-                    }
-
-                    cancel();
+                // If the selected slot is empty, add the boomerang to it
+                if (player.getInventory().getItem(selectedSlot) == null) {
+                    player.getInventory().setItem(selectedSlot, latestBoomerang);
+                    playReceiveSound(player, soundSection);
+                } else {
+                    // If the selected slot is not empty, drop the boomerang at the player's location
+                    player.getWorld().dropItemNaturally(player.getLocation(), latestBoomerang);
+                    playReceiveSound(player, soundSection);
                 }
 
+                // Remove the player from playerBoomer when boomerang returns
+                playerBoomer.get(player).remove(key);
+                if (playerBoomer.get(player).isEmpty()) {
+                    playerBoomer.remove(player);
+                }
+
+                cancel();
             }
         }
     }

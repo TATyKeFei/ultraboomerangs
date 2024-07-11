@@ -27,6 +27,13 @@ public class configUpdater {
                     currentSection.set("armorstand_arm.x_rotation", 0);
                     currentSection.set("armorstand_arm.y_rotation", 20);
                     currentSection.set("armorstand_arm.z_rotation", 0);
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add armorstand rotation section");
+
+                }
+                if (!currentSection.getKeys(false).contains("rotation_type")) {
+                    currentSection.createSection("rotation_type");
+                    currentSection.set("rotation_type", "normal");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add rotation type section");
                 }
                 if (!currentSection.getKeys(false).contains("mcmmo_skill")) {
                     currentSection.createSection("mcmmo_skill");
