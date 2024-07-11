@@ -11,6 +11,8 @@ import me.abisgamer.ultraboomerangs.utils.McMMOHelper;
 import me.abisgamer.ultraboomerangs.utils.auraSkillsHelper;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -449,8 +451,9 @@ public class throwListener implements Listener {
             EulerAngle rotnew = rot.add(itemBuilder.boomerang_armorstand_x.get(key), itemBuilder.boomerang_armorstand_y.get(key), itemBuilder.boomerang_armorstand_z.get(key));
             as.setRightArmPose(rotnew);
             String rotationType = itemBuilder.rotationType.get(key);
-            double angle = rotationType.equals("curved") ? Math.toRadians(i * 180.0 / distance) : 0;
+            double angle = rotationType.equals("curved") ? Math.toRadians(i * 180.0 / (distance / 2)) : 0;
             Vector newVector;
+
             if (rotationType.equals("curved")) {
                 Vector initialDirection = player.getEyeLocation().getDirection();
                 initialDirection.setY(-initialDirection.getY());
@@ -460,7 +463,8 @@ public class throwListener implements Listener {
                         initialDirection.getY(),
                         initialDirection.getX() * Math.sin(angle) + initialDirection.getZ() * Math.cos(angle)
                 );
-                newVector.setY(newVector.getY() * Math.cos(Math.toRadians(i * 180.0 / distance)));
+                newVector.setY(newVector.getY() * Math.cos(angle));
+                Bukkit.getLogger().info("Curved Boomerang New Vector: " + newVector);
             } else {
                 newVector = vector;
             }
@@ -474,6 +478,8 @@ public class throwListener implements Listener {
             }
 
             i++;
+            Bukkit.getLogger().info("Boomerang Position: " + as.getLocation());
+            Bukkit.getLogger().info("Boomerang Distance Traveled: " + i);
 
             for (Entity entity : as.getLocation().getChunk().getEntities()) {
                 if (!as.isDead()) {
@@ -489,37 +495,16 @@ public class throwListener implements Listener {
             }
 
             if (as.getTargetBlockExact(1) != null && !as.getTargetBlockExact(1).isPassable()) {
+                Bukkit.getLogger().info("Boomerang Hit Block at: " + as.getLocation());
                 if (!as.isDead()) {
                     if (rotationType.equals("curved")) {
-                        // Adjust the direction of the boomerang to curve back towards the player
-                        Vector currentPosition = as.getLocation().toVector();
-                        Vector playerPosition = player.getLocation().toVector();
-                        Vector directionToPlayer = playerPosition.subtract(currentPosition).normalize();
-
-                        // Adjust the angle to make it curve back towards the player
-                        angle += Math.toRadians(90); // Adjust angle as needed
-
-                        // Update newVector to curve towards the player
-                        newVector = new Vector(
-                                directionToPlayer.getX() * Math.cos(angle) - directionToPlayer.getZ() * Math.sin(angle),
-                                directionToPlayer.getY(),
-                                directionToPlayer.getX() * Math.sin(angle) + directionToPlayer.getZ() * Math.cos(angle)
-                        );
-                        newVector.setY(newVector.getY() * Math.cos(Math.toRadians(i * 180.0 / distance)));
-
-                        // Ensure the new angle calculation is applied immediately
-                        distance = (int) (distance - i); // Reduce the remaining distance
-                        i = 0; // Reset counter to start returning
+                        giveBoomerangToPlayer();
                     } else {
-                        // Reverse the direction of the boomerang for the normal path
                         newVector = newVector.multiply(-1);
-                        // Ensure the vector remains valid
                         if (!Double.isFinite(newVector.getX()) || !Double.isFinite(newVector.getY()) || !Double.isFinite(newVector.getZ())) {
                             newVector = new Vector(0, 0, 0);
                         }
-                        // Reset i to make it travel the same distance in the opposite direction
                         i = 0;
-                        distance = (int) (distance - i); // Reduce the remaining distance
                     }
                 }
             }
@@ -556,9 +541,13 @@ public class throwListener implements Listener {
 
             cancel();
         }
+
+
     }
 
-    @EventHandler
+
+
+        @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof ArmorStand) {
             ArmorStand as = (ArmorStand) event.getDamager();
