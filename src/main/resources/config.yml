@@ -1,49 +1,47 @@
-#####################################
+# ####################################
 # UltraBoomerangs  -  By AbisGamer  #
-#####################################
-
-#The armorstand arm position
-armorstand:
-  x: 0
-  y: 120
-  z: 0
+# ####################################
 
 listener:
-  priority: HIGH #Can be HIGH, HIGHEST, LOW, LOWEST, MONITOR, NORMAL
+  priority: HIGH # Can be HIGH, HIGHEST, LOW, LOWEST, MONITOR, NORMAL
 
 update-old-boomerangs: false # Enable this to update old boomerangs with PDC if you were using 1.0.2 or below, if not then you SHOULD disable it.
 
 boomerangs:
   boomerang_1:
-    material: bone #The material
-    is-itemstack: false #Material, Name, Lore, custom-model & enchanted are ignored when this is set to true and a valid itemstack is provided
-    name: "&6Ultra Boomerang" #The display name
+    material: bone # The material
+    is-itemstack: false # Material, Name, Lore, custom-model & enchanted are ignored when this is set to true and a valid itemstack is provided
+    name: '&6Ultra Boomerang' # The display name
     lore:
       - '&7---'
       - '&6LEGENDARY BOOMERANG'
       - '&7---'
-    damage: 50 #Damage done to entities
-    custom-model: 1022 #Custom model data
-    enchanted: true #Make the boomerang enchanted giving it the glowing effect
-    travel-distance: 5 #How far the boomerang should travel when thrown
-    click-type: "right" #Possible types: right, left, drop, shift-left or shift-right
-    cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
-    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
-    mcmmo_skill_amount: 10 #the amount of xp to give
-    auraskills_skill: "Archery" #if you don't use mcmmo, leave this as none
-    auraskills_skill_amount: 10 #the amount of xp to give
-    auto-pickup: true #Auto pickup the loot dropped by the entity killed
+    damage: 50 # Damage done to entities
+    custom-model: 1022 # Custom model data
+    enchanted: true # Make the boomerang enchanted giving it the glowing effect
+    travel-distance: 10 # How far the boomerang should travel when thrown
+    click-type: drop # Possible types: right, left, drop
+    cooldown: 3 # Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: Archery # if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 # the amount of xp to give
     sounds:
       enabled: true
-      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
-      receive-sound: "ENTITY_ITEM_PICKUP"
+      throw-sound: ENTITY_ENDER_DRAGON_FLAP
+      receive-sound: ENTITY_ITEM_PICKUP
       volume: 1.0
       pitch: 1.0
+    auraskills_skill: Archery
+    auraskills_skill_amount: '10'
+    auto-pickup: 'false'
+    armorstand_arm:
+      x_rotation: 0
+      y_rotation: 20 #Boomerang type rotation
+      z_rotation: 0
 
   boomerang_2:
     is-itemstack: false
     material: iron_axe
-    name: "&6Axe Boomerang"
+    name: '&6Axe Boomerang'
     lore:
       - '&7---'
       - '&6LEGENDARY BOOMERANG'
@@ -52,24 +50,28 @@ boomerangs:
     custom-model: 1024
     enchanted: false
     travel-distance: 10
-    click-type: "right" #Possible types: right, left, drop, shift-left or shift-right
-    cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
-    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
-    mcmmo_skill_amount: 10 #the amount of xp to give
-    auraskills_skill: "Archery" #if you don't use mcmmo, leave this as none
-    auraskills_skill_amount: 10 #the amount of xp to give
-    auto-pickup: true #Auto pickup the loot dropped by the entity killed
+    click-type: right # Possible types: right, left, drop
+    cooldown: 3 # Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: Archery # if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 # the amount of xp to give
     sounds:
       enabled: true
-      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
-      receive-sound: "ENTITY_ITEM_PICKUP"
+      throw-sound: ENTITY_ENDER_DRAGON_FLAP
+      receive-sound: ENTITY_ITEM_PICKUP
       volume: 1.0
       pitch: 1.0
+    auraskills_skill: Archery
+    auraskills_skill_amount: '10'
+    auto-pickup: 'false'
+    armorstand_arm:
+      x_rotation: 5 #Straight rotation for axe
+      y_rotation: 0
+      z_rotation: 0
 
   boomerang_3:
     is-itemstack: false
     material: diamond_axe
-    name: "&6Chopper Boomerang"
+    name: '&6Chopper Boomerang'
     lore:
       - '&7---'
       - '&6LEGENDARY BOOMERANG'
@@ -78,62 +80,74 @@ boomerangs:
     custom-model: 1026
     enchanted: true
     travel-distance: 15
-    click-type: "left" #Possible types: right, left, drop, shift-left or shift-right
-    cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
-    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
-    mcmmo_skill_amount: 10 #the amount of xp to give
-    auraskills_skill: "Archery" #if you don't use mcmmo, leave this as none
-    auraskills_skill_amount: 10 #the amount of xp to give
-    auto-pickup: true #Auto pickup the loot dropped by the entity killed
+    click-type: left # Possible types: right, left, drop
+    cooldown: 3 # Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: Archery # if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 # the amount of xp to give
+    auraskills_skill: Archery # if you don't use mcmmo, leave this as none
+    auraskills_skill_amount: 10 # the amount of xp to give
     sounds:
       enabled: true
-      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
-      receive-sound: "ENTITY_ITEM_PICKUP"
-      volume: 1.0
-      pitch: 1.0
+      throw-sound: ENTITY_EXPERIENCE_BOTTLE_THROW
+      recieve-sound: ENTITY_EXPERIENCE_BOTTLE_THROW
+      volume: 0.4
+      pitch: 0.4
+    auto-pickup: 'false'
+    armorstand_arm:
+      x_rotation: 5
+      y_rotation: 0
+      z_rotation: 0
 
   stoney:
     itemstack:
       ==: org.bukkit.inventory.ItemStack
-      v: 2230
+      v: 3953
       type: STONE_SWORD
     is-itemstack: true
     enchanted: true
     damage: 50
     travel-distance: 10
-    click-type: "left" #Possible types: right, left, drop, shift-left or shift-right
-    cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
-    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
-    mcmmo_skill_amount: 10 #the amount of xp to give
-    auraskills_skill: "Archery" #if you don't use mcmmo, leave this as none
-    auraskills_skill_amount: 10 #the amount of xp to give
-    auto-pickup: true #Auto pickup the loot dropped by the entity killed
+    click-type: left # Possible types: right, left, drop
+    cooldown: 3 # Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: Archery # if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 # the amount of xp to give
+    auraskills_skill: Archery # if you don't use mcmmo, leave this as none
+    auraskills_skill_amount: 10 # the amount of xp to give
     sounds:
       enabled: true
-      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
-      receive-sound: "ENTITY_ITEM_PICKUP"
+      throw-sound: ENTITY_ENDER_DRAGON_FLAP
+      receive-sound: ENTITY_ITEM_PICKUP
       volume: 1.0
       pitch: 1.0
+    auto-pickup: 'false'
+    armorstand_arm:
+      x_rotation: 5
+      y_rotation: 0
+      z_rotation: 0
 
-  #This one gets thrown when you drop it, get it, dropper, haha? no funny? okay
+  # This one gets thrown when you drop it, get it, dropper, haha? no funny? okay
   dropper:
     itemstack:
       ==: org.bukkit.inventory.ItemStack
-      v: 2230
+      v: 3953
       type: DROPPER
     is-itemstack: true
     damage: 50
     travel-distance: 10
-    click-type: "drop" #Possible types: right, left, drop, shift-left or shift-right
-    cooldown: 3 #Seconds of cooldown before being able to throw this boomerang again
-    mcmmo_skill: "Archery" #if you don't use mcmmo, leave this as none
-    mcmmo_skill_amount: 10 #the amount of xp to give
-    auraskills_skill: "Archery" #if you don't use mcmmo, leave this as none
-    auraskills_skill_amount: 10 #the amount of xp to give
-    auto-pickup: true #Auto pickup the loot dropped by the entity killed
+    click-type: drop # Possible types: right, left, drop
+    cooldown: 3 # Seconds of cooldown before being able to throw this boomerang again
+    mcmmo_skill: Archery # if you don't use mcmmo, leave this as none
+    mcmmo_skill_amount: 10 # the amount of xp to give
+    auraskills_skill: Archery # if you don't use mcmmo, leave this as none
+    auraskills_skill_amount: 10 # the amount of xp to give
     sounds:
       enabled: true
-      throw-sound: "ENTITY_ENDER_DRAGON_FLAP"
-      receive-sound: "ENTITY_ITEM_PICKUP"
+      throw-sound: ENTITY_ENDER_DRAGON_FLAP
+      receive-sound: ENTITY_ITEM_PICKUP
       volume: 1.0
       pitch: 1.0
+    auto-pickup: 'false'
+    armorstand_arm:
+      x_rotation: 0
+      y_rotation: 20
+      z_rotation: 0

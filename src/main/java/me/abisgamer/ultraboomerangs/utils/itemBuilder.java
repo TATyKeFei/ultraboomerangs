@@ -22,6 +22,10 @@ public class itemBuilder {
     public static HashMap<String, Boolean> supportDurability = new HashMap<>();
     public static HashMap<String, String> mcmmoSkills = new HashMap<>();
     public static HashMap<String, Integer> mcmmoSkillAmounts = new HashMap<>();
+    public static HashMap<String, Integer> boomerang_armorstand_x = new HashMap<>();
+    public static HashMap<String, Integer> boomerang_armorstand_y = new HashMap<>();
+    public static HashMap<String, Integer> boomerang_armorstand_z = new HashMap<>();
+
 
     public static void createBoomerangs() {
         ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
@@ -45,6 +49,10 @@ public class itemBuilder {
                 boolean supportDurabilityOption = config.getBoolean("boomerangs." + key + ".support-durability", false);
                 String mcmmoSkill = config.getString("boomerangs." + key + ".mcmmo_skill", "none");
                 int mcmmoSkillAmount = config.getInt("boomerangs." + key + ".mcmmo_skill_amount", 0);
+                int boomerang_armorstand_x_value = config.getInt("boomerangs." + key + ".armorstand_arm.x_rotation", 0);
+                int boomerang_armorstand_y_value = config.getInt("boomerangs." + key + ".armorstand_arm.y_rotation", 0);
+                int boomerang_armorstand_z_value = config.getInt("boomerangs." + key + ".armorstand_arm.z_rotation", 0);
+
 
                 ItemStack boomerang;
                 if (!isItemstack) {
@@ -79,6 +87,10 @@ public class itemBuilder {
                 supportDurability.put(key, supportDurabilityOption);
                 mcmmoSkills.put(key, mcmmoSkill);
                 mcmmoSkillAmounts.put(key, mcmmoSkillAmount);
+                boomerang_armorstand_x.put(key, boomerang_armorstand_x_value);
+                boomerang_armorstand_y.put(key, boomerang_armorstand_y_value);
+                boomerang_armorstand_z.put(key, boomerang_armorstand_z_value);
+
 
                 UltraBoomerangs.plugin.getLogger().info("Loaded Boomerang: " + key);
             }

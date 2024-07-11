@@ -219,13 +219,14 @@ public class throwListener implements Listener {
         //thrownBoomerang = updateItemMeta(thrownBoomerang, key); // Ensure the cloned item is updated
         //plugin.getLogger().info("After updating thrown boomerang: " + thrownBoomerang);
 
+
         ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(player.getEyeLocation().subtract(0, 0.5, 0), EntityType.ARMOR_STAND);
         as.setVisible(false);
         as.setArms(true);
         as.setGravity(false);
         as.setMarker(true);
         as.setItemInHand(thrownBoomerang);
-        as.setRightArmPose(new EulerAngle(Math.toRadians(config.getInt("armorstand.x")), Math.toRadians(config.getInt("armorstand.y")), Math.toRadians(config.getInt("armorstand.z"))));
+        as.setRightArmPose(new EulerAngle(Math.toRadians(itemBuilder.boomerang_armorstand_x.get(key)), Math.toRadians(itemBuilder.boomerang_armorstand_y.get(key)), Math.toRadians(itemBuilder.boomerang_armorstand_z.get(key))));
 
         ArrayList<Entity> armorEntity = armorStandEntity.computeIfAbsent(player, k -> new ArrayList<>());
         armorEntity.add(as);
@@ -448,7 +449,7 @@ public class throwListener implements Listener {
         @Override
         public void run() {
             EulerAngle rot = as.getRightArmPose();
-            EulerAngle rotnew = rot.add(0, 20, 0);
+            EulerAngle rotnew = rot.add(itemBuilder.boomerang_armorstand_x.get(key), itemBuilder.boomerang_armorstand_y.get(key), itemBuilder.boomerang_armorstand_z.get(key));
             as.setRightArmPose(rotnew);
 
             if (i >= distance) {

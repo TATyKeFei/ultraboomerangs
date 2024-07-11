@@ -8,16 +8,6 @@ import java.util.Set;
 public class configUpdater {
     public static void updateConfig() {
         ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
-        //Add rotation config
-        if (!config.getKeys(false).contains("armorstand")) {
-            config.createSection("armorstand");
-            config.set("armorstand.x", 0);
-            config.set("armorstand.y", 120);
-            config.set("armorstand.z", 0);
-            UltraBoomerangs.plugin.saveConfig();
-            UltraBoomerangs.plugin.reloadConfig();
-            UltraBoomerangs.plugin.getLogger().info("Updated config to add Armorstand Arm Rotation section.");
-        }
 
         ConfigurationSection boomerangSection = config.getConfigurationSection("boomerangs");
         if (boomerangSection != null) {
@@ -31,6 +21,12 @@ public class configUpdater {
                     currentSection.set("sounds.recieve-sound", "ENTITY_EXPERIENCE_BOTTLE_THROW");
                     currentSection.set("sounds.volume", 0.4);
                     currentSection.set("sounds.pitch", 0.4);
+                }
+                if (!currentSection.getKeys(false).contains("armorstand_arm")) {
+                    currentSection.createSection("armorstand_arm");
+                    currentSection.set("armorstand_arm.x_rotation", 0);
+                    currentSection.set("armorstand_arm.y_rotation", 20);
+                    currentSection.set("armorstand_arm.z_rotation", 0);
                 }
                 if (!currentSection.getKeys(false).contains("mcmmo_skill")) {
                     currentSection.createSection("mcmmo_skill");
