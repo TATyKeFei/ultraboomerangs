@@ -51,6 +51,10 @@ public class makeCommand implements CommandExecutor {
                             armorStandSection.set("x_rotation", 0);
                             armorStandSection.set("y_rotation", 20);
                             armorStandSection.set("z_rotation", 0);
+                            ConfigurationSection launchOffsetSection = boomerangSection.createSection("launch_offset");
+                            launchOffsetSection.set("x", 0);
+                            launchOffsetSection.set("y", 0);
+                            launchOffsetSection.set("z", 0);
                             boomerangSection.set("rotation_type", "normal");
 
                             UltraBoomerangs.plugin.saveConfig();

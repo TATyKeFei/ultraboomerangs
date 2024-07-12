@@ -24,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -318,7 +319,15 @@ public class BoomerangHandler {
         ItemStack thrownBoomerang = itemBuilder.boomerangs.get(key).clone(); // Get the item directly from the config
         String thrownBoomerangName = thrownBoomerang.getItemMeta().getDisplayName();
 
-        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(player.getEyeLocation().subtract(0, 0.5, 0), EntityType.ARMOR_STAND);
+        // Retrieve offsets from itemBuilder
+        double xOffset = itemBuilder.offset_x.get(key);
+        double yOffset = itemBuilder.offset_y.get(key);
+        double zOffset = itemBuilder.offset_z.get(key);
+
+        // Adjust the spawn location with the offsets
+        Location spawnLocation = player.getEyeLocation().subtract(0, 0.5, 0).add(new Vector(xOffset, yOffset, zOffset));
+
+        ArmorStand as = (ArmorStand) player.getWorld().spawnEntity(spawnLocation, EntityType.ARMOR_STAND);
         as.setVisible(false);
         as.setArms(true);
         as.setGravity(false);
