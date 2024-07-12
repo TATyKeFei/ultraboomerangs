@@ -465,13 +465,11 @@ public class throwListener implements Listener {
                         initialDirection.getX() * Math.sin(angle) + initialDirection.getZ() * Math.cos(angle)
                 );
                 newVector.setY(newVector.getY() * Math.cos(angle));
-                Bukkit.getLogger().info("Curved Boomerang New Vector: " + newVector);
             } else {
                 newVector = vector;
             }
 
             if (i >= distance) {
-                as.teleport(as.getLocation().subtract(newVector.normalize()));
                 giveBoomerangToPlayer();
                 return; // Ensure the task stops after giving the boomerang back
             } else {
@@ -479,8 +477,6 @@ public class throwListener implements Listener {
             }
 
             i++;
-            Bukkit.getLogger().info("Boomerang Position: " + as.getLocation());
-            Bukkit.getLogger().info("Boomerang Distance Traveled: " + i);
 
             for (Entity entity : as.getLocation().getChunk().getEntities()) {
                 if (!as.isDead()) {
@@ -496,52 +492,21 @@ public class throwListener implements Listener {
             }
 
             Block targetBlock = as.getLocation().getBlock();
-            if (!targetBlock.isPassable()) {
-                BlockFace hitFace = getHitFace(as.getLocation(), newVector);
-                if (hitFace != null) {
-                    Bukkit.getLogger().info("Boomerang Hit Block at: " + as.getLocation());
+            if (as.getTargetBlockExact(1) != null && !as.getTargetBlockExact(1).isPassable()) {
                     if (!as.isDead()) {
-                        Vector normal = hitFace.getDirection();
-                        Vector reflection = newVector.clone().subtract(normal.multiply(2 * newVector.dot(normal))).multiply(0.8); // bounciness factor
-                        newVector = reflection;
-
-                        Bukkit.getLogger().info("Block Face Direction: " + normal);
-                        Bukkit.getLogger().info("Reflection Vector: " + reflection);
-
-                        if (!Double.isFinite(newVector.getX()) || !Double.isFinite(newVector.getY()) || !Double.isFinite(newVector.getZ())) {
-                            newVector = new Vector(0, 0, 0);
+                        if (rotationType.equals("curved")) {
+                            giveBoomerangToPlayer();
                         } else {
-                            vector = newVector; // Update the main vector to use the new reflection vector
+                            // Change the direction of the boomerang when it hits a block
+                            newVector = newVector.multiply(-1);
                         }
-                        i = 0;
                     }
-                }
             }
 
             // Ensure giveBoomerangToPlayer is only called once
             if (i >= distance * 2) {
                 giveBoomerangToPlayer();
             }
-        }
-
-        private BlockFace getHitFace(Location location, Vector direction) {
-            Block block = location.getBlock();
-            Vector blockCenter = block.getLocation().add(0.5, 0.5, 0.5).toVector();
-            Vector relative = location.toVector().subtract(blockCenter).normalize();
-
-            double max = -1.0;
-            BlockFace hitFace = null;
-
-            for (BlockFace face : BlockFace.values()) {
-                Vector faceDirection = face.getDirection();
-                double dot = relative.dot(faceDirection);
-                if (dot > max) {
-                    max = dot;
-                    hitFace = face;
-                }
-            }
-
-            return hitFace;
         }
 
         private void giveBoomerangToPlayer() {
@@ -570,9 +535,6 @@ public class throwListener implements Listener {
 
             cancel();
         }
-
-
-
 
     }
 
