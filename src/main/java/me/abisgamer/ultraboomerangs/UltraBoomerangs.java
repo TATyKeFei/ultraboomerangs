@@ -2,10 +2,11 @@ package me.abisgamer.ultraboomerangs;
 
 import me.abisgamer.ultraboomerangs.commands.mainCommand;
 import me.abisgamer.ultraboomerangs.listeners.mcMMOListener;
-import me.abisgamer.ultraboomerangs.listeners.throwListener;
+import me.abisgamer.ultraboomerangs.listeners.ThrowListener;
 import me.abisgamer.ultraboomerangs.listeners.auraSkillsListener;
 import me.abisgamer.ultraboomerangs.utils.configUpdater;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
+import me.abisgamer.ultraboomerangs.utils.ItemUtils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.EventPriority;
@@ -23,7 +24,8 @@ public final class UltraBoomerangs extends JavaPlugin {
 
     public static boolean isMcMMO = false;
     public static boolean isAuraSkills = false;
-    private throwListener throwListenerInstance; // Store the throwListener instance
+    private ThrowListener throwListenerInstance; // Store the throwListener instance
+    private ItemUtils itemUtilsInstance; // Store the ItemUtils instance
 
 
     @Override
@@ -52,6 +54,9 @@ public final class UltraBoomerangs extends JavaPlugin {
             isAuraSkills = true;
         }
 
+        // Initialize ItemUtils instance
+        itemUtilsInstance = new ItemUtils();
+
         // Register all listeners
         registerAllListeners();
 
@@ -67,7 +72,7 @@ public final class UltraBoomerangs extends JavaPlugin {
 
     public void registerAllListeners() {
         // Create throwListener with correct flags
-        throwListenerInstance = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO, isAuraSkills);
+        throwListenerInstance = new ThrowListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO, isAuraSkills);
 
         // Register listeners with priority from the config
         registerListenersWithPriority(throwListenerInstance);
@@ -75,23 +80,23 @@ public final class UltraBoomerangs extends JavaPlugin {
 
         // Register mcMMOListener if mcMMO is present
         if (isMcMMO) {
-            getServer().getPluginManager().registerEvents(new mcMMOListener(this, throwListenerInstance), this);
+            getServer().getPluginManager().registerEvents(new mcMMOListener(this, itemUtilsInstance), this);
         }
 
         // Register auraSkillsListener if AuraSkills is present
         if (isAuraSkills) {
-            getServer().getPluginManager().registerEvents(new auraSkillsListener(this, throwListenerInstance), this);
+            getServer().getPluginManager().registerEvents(new auraSkillsListener(this, itemUtilsInstance), this);
         }
     }
 
     public void registerAllUpdateListeners() {
         // Create throwListener with correct flags
-        throwListenerInstance = new throwListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO, isAuraSkills);
+        throwListenerInstance = new ThrowListener(plugin.getConfig(), plugin.getConfig().getBoolean("update-old-boomerangs", false), isMcMMO, isAuraSkills);
 
         registerUpdateListenersWithPriority(throwListenerInstance);
     }
 
-    private void registerUpdateListenersWithPriority(throwListener listener) {
+    private void registerUpdateListenersWithPriority(ThrowListener listener) {
         String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
         EventPriority priority;
         try {
@@ -104,7 +109,7 @@ public final class UltraBoomerangs extends JavaPlugin {
         PluginManager pluginManager = getServer().getPluginManager();
         EventExecutor executor = (listener1, event) -> {
             if (event instanceof org.bukkit.event.player.PlayerInteractEvent) {
-                listener.onPlayerInteract((org.bukkit.event.player.PlayerInteractEvent) event);
+                listener.onInteract((org.bukkit.event.player.PlayerInteractEvent) event);
             }
             if (event instanceof org.bukkit.event.inventory.InventoryClickEvent) { // Register InventoryClickEvent
                 listener.onInventoryClick((org.bukkit.event.inventory.InventoryClickEvent) event);
@@ -117,7 +122,7 @@ public final class UltraBoomerangs extends JavaPlugin {
 
     }
 
-    private void registerListenersWithPriority(throwListener listener) {
+    private void registerListenersWithPriority(ThrowListener listener) {
         String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
         EventPriority priority;
         try {
