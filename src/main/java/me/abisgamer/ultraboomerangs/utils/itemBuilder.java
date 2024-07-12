@@ -35,7 +35,6 @@ public class itemBuilder {
         ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
         UltraBoomerangs.plugin.reloadConfig();
         ConfigurationSection boomerangSection = config.getConfigurationSection("boomerangs");
-
         if (boomerangSection != null) {
             Set<String> keys = boomerangSection.getKeys(false);
             for (String key : keys) {
