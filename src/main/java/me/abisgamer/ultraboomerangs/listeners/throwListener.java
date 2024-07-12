@@ -30,6 +30,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
@@ -430,7 +431,7 @@ public class throwListener implements Listener {
         private final String key;
         private final ArrayList<ItemStack> existingItems;
         private final ConfigurationSection soundSection;
-        private final Vector vector;
+        private Vector vector;
         private int distance;
         private int i = 0;
 
@@ -494,15 +495,23 @@ public class throwListener implements Listener {
                 }
             }
 
-            if (as.getTargetBlockExact(1) != null && !as.getTargetBlockExact(1).isPassable()) {
-                Bukkit.getLogger().info("Boomerang Hit Block at: " + as.getLocation());
-                if (!as.isDead()) {
-                    if (rotationType.equals("curved")) {
-                        giveBoomerangToPlayer();
-                    } else {
-                        newVector = newVector.multiply(-1);
+            Block targetBlock = as.getLocation().getBlock();
+            if (!targetBlock.isPassable()) {
+                BlockFace hitFace = getHitFace(as.getLocation(), newVector);
+                if (hitFace != null) {
+                    Bukkit.getLogger().info("Boomerang Hit Block at: " + as.getLocation());
+                    if (!as.isDead()) {
+                        Vector normal = hitFace.getDirection();
+                        Vector reflection = newVector.clone().subtract(normal.multiply(2 * newVector.dot(normal))).multiply(0.8); // bounciness factor
+                        newVector = reflection;
+
+                        Bukkit.getLogger().info("Block Face Direction: " + normal);
+                        Bukkit.getLogger().info("Reflection Vector: " + reflection);
+
                         if (!Double.isFinite(newVector.getX()) || !Double.isFinite(newVector.getY()) || !Double.isFinite(newVector.getZ())) {
                             newVector = new Vector(0, 0, 0);
+                        } else {
+                            vector = newVector; // Update the main vector to use the new reflection vector
                         }
                         i = 0;
                     }
@@ -513,6 +522,26 @@ public class throwListener implements Listener {
             if (i >= distance * 2) {
                 giveBoomerangToPlayer();
             }
+        }
+
+        private BlockFace getHitFace(Location location, Vector direction) {
+            Block block = location.getBlock();
+            Vector blockCenter = block.getLocation().add(0.5, 0.5, 0.5).toVector();
+            Vector relative = location.toVector().subtract(blockCenter).normalize();
+
+            double max = -1.0;
+            BlockFace hitFace = null;
+
+            for (BlockFace face : BlockFace.values()) {
+                Vector faceDirection = face.getDirection();
+                double dot = relative.dot(faceDirection);
+                if (dot > max) {
+                    max = dot;
+                    hitFace = face;
+                }
+            }
+
+            return hitFace;
         }
 
         private void giveBoomerangToPlayer() {
@@ -541,6 +570,8 @@ public class throwListener implements Listener {
 
             cancel();
         }
+
+
 
 
     }

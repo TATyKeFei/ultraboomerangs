@@ -47,6 +47,12 @@ public class makeCommand implements CommandExecutor {
                             soundsSection.set("volume", 1.0);
                             soundsSection.set("pitch", 1.0);
 
+                            ConfigurationSection armorStandSection = boomerangSection.createSection("armorstand_arm");
+                            armorStandSection.set("x_rotation", 0);
+                            armorStandSection.set("y_rotation", 20);
+                            armorStandSection.set("z_rotation", 0);
+                            boomerangSection.set("rotation_type", "normal");
+
                             UltraBoomerangs.plugin.saveConfig();
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("prefix") + messages.getString("make-success") + boomerangId));
                             itemBuilder.createBoomerangs();
