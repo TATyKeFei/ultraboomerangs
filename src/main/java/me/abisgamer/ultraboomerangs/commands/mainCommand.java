@@ -21,6 +21,8 @@ public class mainCommand implements CommandExecutor {
                 return new makeCommand().onCommand(sender, command, label, subArgs);
             } else if (subCommand.equalsIgnoreCase("reload")) {
                 return new reloadCommand().onCommand(sender, command, label, subArgs);
+            } else if (subCommand.equalsIgnoreCase("list")) {
+                return new listCommand().onCommand(sender, command, label, subArgs);
             }
         } else {
             return new helpCommand().onCommand(sender, command, label, args);

@@ -7,9 +7,14 @@ import me.abisgamer.ultraboomerangs.listeners.auraSkillsListener;
 import me.abisgamer.ultraboomerangs.utils.configUpdater;
 import me.abisgamer.ultraboomerangs.utils.itemBuilder;
 import me.abisgamer.ultraboomerangs.utils.ItemUtils;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 
-public final class UltraBoomerangs extends JavaPlugin {
+public final class UltraBoomerangs extends JavaPlugin implements Listener {
 
     public static UltraBoomerangs plugin;
     public FileConfiguration messages;
@@ -60,6 +65,8 @@ public final class UltraBoomerangs extends JavaPlugin {
         // Register all listeners
         registerAllListeners();
 
+        getServer().getPluginManager().registerEvents(this, this);
+
         // Load messages file
         File f = new File(getDataFolder() + File.separator + "messages.yml");
         if (!f.exists()) {
@@ -96,6 +103,7 @@ public final class UltraBoomerangs extends JavaPlugin {
         registerUpdateListenersWithPriority(throwListenerInstance);
     }
 
+
     private void registerUpdateListenersWithPriority(ThrowListener listener) {
         String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
         EventPriority priority;
@@ -120,6 +128,28 @@ public final class UltraBoomerangs extends JavaPlugin {
         pluginManager.registerEvent(org.bukkit.event.inventory.InventoryClickEvent.class, listener, priority, executor, this); // Add InventoryClickEvent registration
         pluginManager.registerEvent(org.bukkit.event.player.PlayerInteractEvent.class, listener, priority, executor, this); // Add InventoryClickEvent registration
 
+    }
+
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (event.getPlayer().isOp()) {
+            // Create main message
+            TextComponent mainMessage = new TextComponent("§6Check out our brand new plugin, perfect for RPG servers, UltraCollections:\n");
+
+            // Create clickable BuiltByBit link
+            TextComponent builtByBitLink = new TextComponent("§eBuiltByBit: §aClick here\n");
+            builtByBitLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://builtbybit.com/resources/ultraboomerangs-fully-custom-boomerang.33117/"));
+
+            // Create clickable Polymart link
+            TextComponent polymartLink = new TextComponent("§ePolymart: §aClick here\n");
+            polymartLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://polymart.org/resource/ultracollections-customizable.6483"));
+
+            // Send the main message and the clickable links to the player
+            event.getPlayer().spigot().sendMessage(mainMessage);
+            event.getPlayer().spigot().sendMessage(builtByBitLink);
+            event.getPlayer().spigot().sendMessage(polymartLink);
+        }
     }
 
     private void registerListenersWithPriority(ThrowListener listener) {
