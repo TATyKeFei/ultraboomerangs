@@ -34,7 +34,7 @@ public class configUpdater {
                     currentSection.set("launch_offset.x", 0);
                     currentSection.set("launch_offset.y", 0);
                     currentSection.set("launch_offset.z", 0);
-                    UltraBoomerangs.plugin.getLogger().info("Updated config to add armorstand rotation section");
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add launch offset section");
                 }
                 if (!currentSection.getKeys(false).contains("rotation_type")) {
                     currentSection.createSection("rotation_type");
@@ -71,7 +71,16 @@ public class configUpdater {
                     currentSection.set("click-type", "right");
                     UltraBoomerangs.plugin.getLogger().info("Updated config to add click-type section");
                 }
-
+                if (!currentSection.getKeys(false).contains("support-durability")) {
+                    currentSection.createSection("support-durability");
+                    currentSection.set("support-durability", true);
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add support-durability section");
+                }
+                if (!currentSection.getKeys(false).contains("speed")) {
+                    currentSection.createSection("speed");
+                    currentSection.set("speed", 1.0);
+                    UltraBoomerangs.plugin.getLogger().info("Updated config to add speed section");
+                }
             }
         }
         if (!config.getKeys(false).contains("listener")) {
@@ -85,7 +94,6 @@ public class configUpdater {
             config.set("update-old-boomerangs", true); // Default to true
             UltraBoomerangs.plugin.getLogger().info("Updated config to add update-old-boomerangs option.");
         }
-            UltraBoomerangs.plugin.saveConfig();
-
+        UltraBoomerangs.plugin.saveConfig();
     }
 }

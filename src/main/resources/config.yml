@@ -24,6 +24,7 @@ boomerangs:
     cooldown: 3 # Seconds of cooldown before being able to throw this boomerang again
     mcmmo_skill: Archery # if you don't use mcmmo, leave this as none
     mcmmo_skill_amount: 10 # the amount of xp to give
+    support-durability: true
     sounds:
       enabled: true
       throw-sound: ENTITY_ENDER_DRAGON_FLAP
@@ -59,6 +60,7 @@ boomerangs:
     cooldown: 3 # Seconds of cooldown before being able to throw this boomerang again
     mcmmo_skill: Archery # if you don't use mcmmo, leave this as none
     mcmmo_skill_amount: 10 # the amount of xp to give
+    support-durability: true
     sounds:
       enabled: true
       throw-sound: ENTITY_ENDER_DRAGON_FLAP
@@ -96,6 +98,7 @@ boomerangs:
     mcmmo_skill_amount: 10 # the amount of xp to give
     auraskills_skill: Archery # if you don't use mcmmo, leave this as none
     auraskills_skill_amount: 10 # the amount of xp to give
+    support-durability: true
     sounds:
       enabled: true
       throw-sound: ENTITY_EXPERIENCE_BOTTLE_THROW
@@ -128,6 +131,7 @@ boomerangs:
     mcmmo_skill_amount: 10 # the amount of xp to give
     auraskills_skill: Archery # if you don't use mcmmo, leave this as none
     auraskills_skill_amount: 10 # the amount of xp to give
+    support-durability: true
     sounds:
       enabled: true
       throw-sound: ENTITY_ENDER_DRAGON_FLAP
@@ -160,6 +164,7 @@ boomerangs:
     mcmmo_skill_amount: 10 # the amount of xp to give
     auraskills_skill: Archery # if you don't use mcmmo, leave this as none
     auraskills_skill_amount: 10 # the amount of xp to give
+    support-durability: true
     sounds:
       enabled: true
       throw-sound: ENTITY_ENDER_DRAGON_FLAP

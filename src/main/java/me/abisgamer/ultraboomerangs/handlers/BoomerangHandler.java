@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -57,22 +58,22 @@ public class BoomerangHandler {
             Set<String> keys = boomerangSection.getKeys(false);
             for (String key : keys) {
                 Action action = event.getAction();
-                String ConfigClickType = itemBuilder.clickType.get(key);
+                String configClickType = itemBuilder.clickType.get(key);
                 Action clickType;
                 Action secondClickType;
                 boolean requiresSneaking = false;
 
-                if (Objects.equals(ConfigClickType, "right")) {
+                if (Objects.equals(configClickType, "right")) {
                     clickType = Action.RIGHT_CLICK_AIR;
                     secondClickType = Action.RIGHT_CLICK_BLOCK;
-                } else if (Objects.equals(ConfigClickType, "left")) {
+                } else if (Objects.equals(configClickType, "left")) {
                     clickType = Action.LEFT_CLICK_AIR;
                     secondClickType = Action.LEFT_CLICK_BLOCK;
-                } else if (Objects.equals(ConfigClickType, "shift-right")) {
+                } else if (Objects.equals(configClickType, "shift-right")) {
                     clickType = Action.RIGHT_CLICK_AIR;
                     secondClickType = Action.RIGHT_CLICK_BLOCK;
                     requiresSneaking = true;
-                } else if (Objects.equals(ConfigClickType, "shift-left")) {
+                } else if (Objects.equals(configClickType, "shift-left")) {
                     clickType = Action.LEFT_CLICK_AIR;
                     secondClickType = Action.LEFT_CLICK_BLOCK;
                     requiresSneaking = true;
@@ -87,27 +88,37 @@ public class BoomerangHandler {
                 if (action == clickType || action == secondClickType) {
                     ItemStack itemInHand = player.getInventory().getItemInMainHand();
                     if (ItemUtils.isBoomerang(itemInHand, key, config, updateOldBoomerangs)) {
-                        // Check cooldown before removing the item
-                        Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
+                        // Check cooldown BEFORE removing the item
+                        Long cooldownTime = itemBuilder.cooldownTime.get(key); // cooldown in seconds
                         if (cooldowns.containsKey(key)) {
                             long secondsLeft = ((cooldowns.get(key) / 1000) + cooldownTime) - (System.currentTimeMillis() / 1000);
                             if (secondsLeft > 0) {
-                                // Inform the player about the remaining cooldown time
-                                player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
+                                player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                                        messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
                                 event.setCancelled(true);
-                                return;
+                                return; // Leave the item intact.
                             }
                         }
 
-                        // Remove one boomerang from the player's inventory
+                        // Capture current damage if support-durability is enabled
+                        int storedDamage = 0;
+                        if (itemBuilder.supportDurability.get(key)) {
+                            ItemMeta meta = itemInHand.getItemMeta();
+                            if (meta instanceof Damageable) {
+                                storedDamage = ((Damageable) meta).getDamage();
+                            }
+                        }
+
+                        // Now remove the boomerang from the player's hand
                         if (itemInHand.getAmount() > 1) {
                             itemInHand.setAmount(itemInHand.getAmount() - 1);
                         } else {
                             player.getInventory().setItemInMainHand(null);
                         }
-                        player.updateInventory(); // Ensure the inventory is updated
+                        player.updateInventory();
 
-                        handleBoomerangThrow(player, key); // Pass the updated item
+                        // Pass the stored damage to the throw handler
+                        handleBoomerangThrow(player, key, storedDamage);
                         event.setCancelled(true);
                     }
                 }
@@ -123,34 +134,43 @@ public class BoomerangHandler {
         if (boomerangSection != null) {
             Set<String> keys = boomerangSection.getKeys(false);
             for (String key : keys) {
-                String ConfigClickType = itemBuilder.clickType.get(key);
-                if (!Objects.equals(ConfigClickType, "drop")) {
+                String configClickType = itemBuilder.clickType.get(key);
+                if (!Objects.equals(configClickType, "drop")) {
                     continue;
                 }
                 ItemStack itemDrop = event.getItemDrop().getItemStack();
                 if (ItemUtils.isBoomerang(itemDrop, key, config, updateOldBoomerangs)) {
-                    // Check cooldown before removing the item
-                    Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
+                    // Check cooldown BEFORE removing the item
+                    Long cooldownTime = itemBuilder.cooldownTime.get(key);
                     if (cooldowns.containsKey(key)) {
                         long secondsLeft = ((cooldowns.get(key) / 1000) + cooldownTime) - (System.currentTimeMillis() / 1000);
                         if (secondsLeft > 0) {
-                            // Inform the player about the remaining cooldown time
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
+                            player.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                                    messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
                             event.setCancelled(true);
-                            return;
+                            return; // Leave the item intact.
                         }
                     }
 
-                    // Remove one boomerang from the player's inventory
-                    ItemStack itemInHand = itemDrop.clone();
+                    // Capture current damage if support-durability is enabled
+                    int storedDamage = 0;
+                    if (itemBuilder.supportDurability.get(key)) {
+                        ItemMeta meta = itemDrop.getItemMeta();
+                        if (meta instanceof Damageable) {
+                            storedDamage = ((Damageable) meta).getDamage();
+                        }
+                    }
+
+                    // Remove one boomerang from the player's inventory (or drop)
                     if (itemDrop.getAmount() >= 1) {
                         itemDrop.setAmount(itemDrop.getAmount() - 1);
                     } else {
                         event.getItemDrop().remove();
                     }
-                    player.updateInventory(); // Ensure the inventory is updated
+                    player.updateInventory();
 
-                    handleBoomerangThrow(player, key); // Pass the updated item
+                    // Pass stored damage to the throw handler
+                    handleBoomerangThrow(player, key, storedDamage);
                     event.setCancelled(true);
                     break;
                 }
@@ -238,34 +258,27 @@ public class BoomerangHandler {
 
     public void handleEntityDeath(EntityDeathEvent event) {
         LivingEntity entity = event.getEntity();
-        boolean wasBoomerangDamage = damageTracker.containsKey(entity);
-
         // Capture the drops before scheduling the task to avoid issues with cleared drops
         List<ItemStack> drops = new ArrayList<>(event.getDrops());
 
-        // Schedule the task to handle the drops and other logic
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             List<Player> players = damageTracker.get(entity);
             if (players != null && !players.isEmpty()) {
-                Player player = players.get(players.size() - 1); // Get the last player who damaged the entity
+                Player player = players.get(players.size() - 1);
                 String boomerangKey = ItemUtils.getBoomerangKey(player, playerBoomer);
                 if (boomerangKey != null) {
                     ConfigurationSection boomerangConfig = config.getConfigurationSection("boomerangs." + boomerangKey);
 
-                    // Handle auto-pickup for non-player entities
                     if (!(entity instanceof Player) && boomerangConfig.getBoolean("auto-pickup")) {
                         for (ItemStack drop : drops) {
                             if (drop != null && drop.getType() != Material.AIR) {
                                 player.getInventory().addItem(drop);
                             }
                         }
-                        // Clear the drops only for non-player entities
                         if (!(entity instanceof Player)) {
                             event.getDrops().clear();
                         }
                     }
-
-                    // Optionally, play a sound if configured
                     SoundUtils.playReceiveSound(player, boomerangConfig);
 
                     if (isMcMMO) {
@@ -281,17 +294,14 @@ public class BoomerangHandler {
                     }
                 }
             }
-        }, 1L); // 1 tick delay
+        }, 1L);
     }
 
     public void handleInventoryClick(InventoryClickEvent event) {
         ItemStack item = event.getCurrentItem();
         if (item == null || item.getType() == Material.AIR) return;
-
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
-
-        // Check if the item is a boomerang using PDC
         if (meta.getPersistentDataContainer().has(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING)) {
             String key = meta.getPersistentDataContainer().get(new NamespacedKey(plugin, "boomerang_id"), PersistentDataType.STRING);
             ConfigurationSection boomerangConfig = config.getConfigurationSection("boomerangs." + key);
@@ -301,22 +311,20 @@ public class BoomerangHandler {
         }
     }
 
-    private void handleBoomerangThrow(Player player, String key) {
-        FileConfiguration messages = plugin.messages;
-        Long cooldownTime = itemBuilder.cooldownTime.get(key); // Cooldown time in seconds
-        if (cooldowns.containsKey(key)) {
-            long secondsLeft = ((cooldowns.get(key) / 1000) + cooldownTime) - (System.currentTimeMillis() / 1000);
-            if (secondsLeft > 0) {
-                // Inform the player about the remaining cooldown time
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', messages.getString("cooldown") + secondsLeft + messages.getString("cooldown-2")));
-                return;
-            }
-        }
-
+    // This method no longer checks cooldown since that check is done beforehand.
+    private void handleBoomerangThrow(Player player, String key, int storedDamage) {
         ConfigurationSection soundSection = config.getConfigurationSection("boomerangs." + key + ".sounds");
         SoundUtils.playThrowSound(player, soundSection);
 
-        ItemStack thrownBoomerang = itemBuilder.boomerangs.get(key).clone(); // Get the item directly from the config
+        // Clone the boomerang from the config and apply stored damage if enabled
+        ItemStack thrownBoomerang = itemBuilder.boomerangs.get(key).clone();
+        if (itemBuilder.supportDurability.get(key)) {
+            ItemMeta meta = thrownBoomerang.getItemMeta();
+            if (meta instanceof Damageable) {
+                ((Damageable) meta).setDamage(storedDamage);
+                thrownBoomerang.setItemMeta(meta);
+            }
+        }
         String thrownBoomerangName = thrownBoomerang.getItemMeta().getDisplayName();
 
         // Retrieve offsets from itemBuilder
@@ -335,7 +343,11 @@ public class BoomerangHandler {
         as.setItemInHand(thrownBoomerang);
         as.setCustomName(thrownBoomerangName);
         as.setCustomNameVisible(false);
-        as.setRightArmPose(new EulerAngle(Math.toRadians(itemBuilder.boomerang_armorstand_x.get(key)), Math.toRadians(itemBuilder.boomerang_armorstand_y.get(key)), Math.toRadians(itemBuilder.boomerang_armorstand_z.get(key))));
+        as.setRightArmPose(new EulerAngle(
+                Math.toRadians(itemBuilder.boomerang_armorstand_x.get(key)),
+                Math.toRadians(itemBuilder.boomerang_armorstand_y.get(key)),
+                Math.toRadians(itemBuilder.boomerang_armorstand_z.get(key))
+        ));
 
         ArrayList<Entity> armorEntity = armorStandEntity.computeIfAbsent(player, k -> new ArrayList<>());
         armorEntity.add(as);
@@ -347,7 +359,7 @@ public class BoomerangHandler {
         // Update the cooldown time
         cooldowns.put(key, System.currentTimeMillis());
 
-        final ArrayList<ItemStack> finalExistingItems = existingItems; // Make final for inner class
-        new BoomerangReturnTask(player, as, key, finalExistingItems, soundSection).runTaskTimer(plugin, 1L, 1L);
+        // Pass the storedDamage to the BoomerangReturnTask
+        new BoomerangReturnTask(player, as, key, existingItems, soundSection, storedDamage).runTaskTimer(plugin, 1L, 1L);
     }
 }

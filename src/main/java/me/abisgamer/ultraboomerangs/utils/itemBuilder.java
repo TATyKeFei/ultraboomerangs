@@ -30,6 +30,7 @@ public class itemBuilder {
     public static HashMap<String, Integer> offset_y = new HashMap<>();
     public static HashMap<String, Integer> offset_z = new HashMap<>();
     public static HashMap<String, String> rotationType = new HashMap<>();
+    public static HashMap<String, Double> speedValue = new HashMap<>();
 
     public static void createBoomerangs() {
         ConfigurationSection config = UltraBoomerangs.plugin.getConfig();
@@ -70,6 +71,7 @@ public class itemBuilder {
                     int offset_x_value = config.getInt("boomerangs." + key + ".launch_offset.x", 0);
                     int offset_y_value = config.getInt("boomerangs." + key + ".launch_offset.y", 0);
                     int offset_z_value = config.getInt("boomerangs." + key + ".launch_offset.z", 0);
+                    double speed = config.getDouble("boomerangs." + key + ".speed", 1.0);
 
                     UltraBoomerangs.plugin.getLogger().info("Loading Boomerang: " + key);
 
@@ -113,6 +115,7 @@ public class itemBuilder {
                     offset_x.put(key, offset_x_value);
                     offset_y.put(key, offset_y_value);
                     offset_z.put(key, offset_z_value);
+                    speedValue.put(key, speed);
 
                     UltraBoomerangs.plugin.getLogger().info("Loaded Boomerang: " + key);
                 } catch (Exception e) {
