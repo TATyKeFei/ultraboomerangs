@@ -130,27 +130,26 @@ public final class UltraBoomerangs extends JavaPlugin implements Listener {
 
     }
 
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if (event.getPlayer().isOp()) {
-            // Create main message
-            TextComponent mainMessage = new TextComponent("§6Check out our brand new plugin, perfect for RPG servers, UltraCollections:\n");
-
-            // Create clickable BuiltByBit link
-            TextComponent builtByBitLink = new TextComponent("§eBuiltByBit: §aClick here\n");
-            builtByBitLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://builtbybit.com/resources/ultraboomerangs-fully-custom-boomerang.33117/"));
-
-            // Create clickable Polymart link
-            TextComponent polymartLink = new TextComponent("§ePolymart: §aClick here\n");
-            polymartLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://polymart.org/resource/ultracollections-customizable.6483"));
-
-            // Send the main message and the clickable links to the player
-            event.getPlayer().spigot().sendMessage(mainMessage);
-            event.getPlayer().spigot().sendMessage(builtByBitLink);
-            event.getPlayer().spigot().sendMessage(polymartLink);
-        }
-    }
+//    @EventHandler
+//    public void onPlayerJoin(PlayerJoinEvent event) {
+//        if (event.getPlayer().isOp()) {
+//            // Create main message
+//            TextComponent mainMessage = new TextComponent("§6Check out our brand new plugin, perfect for RPG servers, UltraCollections:\n");
+//
+//            // Create clickable BuiltByBit link
+//            TextComponent builtByBitLink = new TextComponent("§eBuiltByBit: §aClick here\n");
+//            builtByBitLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://builtbybit.com/resources/ultraboomerangs-fully-custom-boomerang.33117/"));
+//
+//            // Create clickable Polymart link
+//            TextComponent polymartLink = new TextComponent("§ePolymart: §aClick here\n");
+//            polymartLink.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://polymart.org/resource/ultracollections-customizable.6483"));
+//
+//            // Send the main message and the clickable links to the player
+//            event.getPlayer().spigot().sendMessage(mainMessage);
+//            event.getPlayer().spigot().sendMessage(builtByBitLink);
+//            event.getPlayer().spigot().sendMessage(polymartLink);
+//        }
+//    }
 
     private void registerListenersWithPriority(ThrowListener listener) {
         String priorityName = plugin.getConfig().getString("listener.priority", "NORMAL").toUpperCase();
