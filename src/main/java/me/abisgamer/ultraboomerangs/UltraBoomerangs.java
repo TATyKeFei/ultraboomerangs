@@ -130,7 +130,7 @@ public final class UltraBoomerangs extends JavaPlugin implements Listener {
 
     }
 
-//    @EventHandler
+    @EventHandler
 //    public void onPlayerJoin(PlayerJoinEvent event) {
 //        if (event.getPlayer().isOp()) {
 //            // Create main message
